@@ -124,3 +124,50 @@ button {
     padding: 5px 10px;
     cursor: pointer;
 }
+
+/* Дополнительные стили для страницы треда */
+.post-number {
+    color: #888;
+    font-size: 0.8em;
+    margin-left: 8px;
+}
+
+.empty-replies {
+    color: #888;
+    text-align: center;
+    padding: 30px;
+    background: #f9f9f9;
+    border: 1px dashed #ccc;
+}
+
+.reply-form button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.reply {
+    transition: background 0.2s;
+}
+
+.reply:hover {
+    background: #f5f5f5;
+}
+
+.post-name strong {
+    font-size: 1.05em;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 600px) {
+    .thread-container {
+        padding: 0 10px;
+    }
+    
+    .post-header {
+        font-size: 0.8em;
+    }
+    
+    .post-content {
+        font-size: 0.9em;
+    }
+}
