@@ -28,75 +28,91 @@
             window.location.href = '/2fun.net/';
         }
         
-        let currentBoard = 'b';
+        let allPosts = [];
         
         function loadThread() {
-            // Сначала получаем информацию о треде (чтобы узнать доску)
             fetch(`${API_BASE}/thread/${threadId}/posts`)
                 .then(r => r.json())
                 .then(posts => {
-                    if (posts.length === 0) {
+                    if (!posts || posts.length === 0) {
                         document.getElementById('content').innerHTML = '<p>Тред не найден</p>';
                         return;
                     }
                     
+                    allPosts = posts;
                     const op = posts[0];
+                    const replies = posts.slice(1);
+                    const replyCount = replies.length;
                     
                     const html = `
                         <div class="thread-container">
                             <div class="op-post">
                                 <div class="post-header">
                                     <span class="post-name">${escapeHtml(op.guest_name || 'Аноним')}</span>
-                                    <span class="post-date">${new Date(op.created_at).toLocaleString()}</span>
+                                    <span class="post-number">№${op.id}</span>
+                                    <span class="post-date">${formatDate(op.created_at)}</span>
                                 </div>
-                                <div class="post-title">${escapeHtml(op.title || '')}</div>
                                 <div class="post-content">${escapeHtml(op.content).replace(/\n/g, '<br>')}</div>
                             </div>
                             
                             <div class="replies">
-                                <h3>Ответы (${posts.length - 1})</h3>
+                                <h3>Ответы (${replyCount})</h3>
+                                
                                 <div class="reply-form">
-                                    <input type="text" id="replyName" placeholder="Имя (Аноним)">
+                                    <input type="text" id="replyName" placeholder="Имя (Аноним)" maxlength="30">
                                     <textarea id="replyContent" placeholder="Текст ответа" rows="3"></textarea>
                                     <button onclick="createReply()">Ответить</button>
                                 </div>
+                                
                                 <div class="reply-list">
-                                    ${posts.slice(1).map(post => `
-                                        <div class="reply">
-                                            <div class="post-header">
-                                                <span class="post-name">${escapeHtml(post.guest_name || 'Аноним')}</span>
-                                                <span class="post-date">${new Date(post.created_at).toLocaleString()}</span>
+                                    ${replyCount === 0 ? '<p class="empty-replies">Пока нет ответов. Будь первым!</p>' : 
+                                        replies.map(post => `
+                                            <div class="reply" id="post-${post.id}">
+                                                <div class="post-header">
+                                                    <span class="post-name"><strong>${escapeHtml(post.guest_name || 'Аноним')}</strong></span>
+                                                    <span class="post-number">№${post.id}</span>
+                                                    <span class="post-date">${formatDate(post.created_at)}</span>
+                                                </div>
+                                                <div class="post-content">${escapeHtml(post.content).replace(/\n/g, '<br>')}</div>
                                             </div>
-                                            <div class="post-content">${escapeHtml(post.content).replace(/\n/g, '<br>')}</div>
-                                        </div>
-                                    `).join('')}
-                                    ${posts.length === 1 ? '<p>Пока нет ответов. Будь первым!</p>' : ''}
+                                        `).join('')
+                                    }
                                 </div>
                             </div>
                         </div>
                     `;
                     document.getElementById('content').innerHTML = html;
+                    
+                    // Скроллим к последнему ответу, если есть якорь
+                    if (location.hash && location.hash.startsWith('#post-')) {
+                        const target = document.querySelector(location.hash);
+                        if (target) target.scrollIntoView({ behavior: 'smooth' });
+                    }
                 })
                 .catch(err => {
                     console.error('Ошибка:', err);
-                    document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка загрузки треда</p>';
+                    document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка загрузки треда. Проверь консоль.</p>';
                 });
         }
         
         function createReply() {
-            const name = document.getElementById('replyName').value;
-            const content = document.getElementById('replyContent').value;
+            const name = document.getElementById('replyName').value.trim();
+            const content = document.getElementById('replyContent').value.trim();
             
-            if (!content.trim()) {
+            if (!content) {
                 alert('Введите текст ответа');
                 return;
             }
+            
+            const btn = document.querySelector('.reply-form button');
+            btn.disabled = true;
+            btn.textContent = 'Отправка...';
             
             fetch(`${API_BASE}/thread/${threadId}/post`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    guest_name: name,
+                    guest_name: name || 'Аноним',
                     content: content
                 })
             })
@@ -106,11 +122,24 @@
             })
             .then(() => {
                 document.getElementById('replyContent').value = '';
-                loadThread(); // перезагружаем чтобы увидеть новый ответ
+                loadThread(); // перезагружаем
             })
             .catch(err => {
                 console.error('Ошибка:', err);
-                alert('Не удалось отправить ответ');
+                alert('Не удалось отправить ответ: ' + err.message);
+                btn.disabled = false;
+                btn.textContent = 'Ответить';
+            });
+        }
+        
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
             });
         }
         
