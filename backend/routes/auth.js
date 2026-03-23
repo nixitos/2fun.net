@@ -3,36 +3,57 @@ const bcrypt = require('bcrypt');
 const router = express.Router();
 
 module.exports = (pool) => {
-    // регистрация
+    // Регистрация
     router.post('/register', async (req, res) => {
         try {
             const { username, password } = req.body;
+            
+            if (!username || !password) {
+                return res.status(400).json({error: 'Логин и пароль обязательны'});
+            }
+            
             const hash = await bcrypt.hash(password, 10);
             await pool.query(
                 'INSERT INTO users (username, password_hash) VALUES ($1, $2)',
                 [username, hash]
             );
-            res.json({success: true});
+            res.json({success: true, message: 'Пользователь создан'});
         } catch(err) {
-            res.status(400).json({error: 'Такой ник уже есть'});
+            if (err.code === '23505') {
+                res.status(400).json({error: 'Такой ник уже существует'});
+            } else {
+                console.error('POST /register error:', err);
+                res.status(500).json({error: err.message});
+            }
         }
     });
 
-    // вход (простой, без jwt пока)
+    // Вход
     router.post('/login', async (req, res) => {
         try {
             const { username, password } = req.body;
-            const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
             
-            if(user.rows.length === 0) throw new Error();
+            const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+            if (user.rows.length === 0) {
+                return res.status(401).json({error: 'Неверный логин или пароль'});
+            }
             
             const match = await bcrypt.compare(password, user.rows[0].password_hash);
-            if(!match) throw new Error();
+            if (!match) {
+                return res.status(401).json({error: 'Неверный логин или пароль'});
+            }
             
-            // в реальном проекте тут выдавать jwt или сессию
-            res.json({success: true, user: {id: user.rows[0].id, username: user.rows[0].username}});
+            res.json({
+                success: true,
+                user: {
+                    id: user.rows[0].id,
+                    username: user.rows[0].username,
+                    is_admin: user.rows[0].is_admin
+                }
+            });
         } catch(err) {
-            res.status(401).json({error: 'Логин/пароль неверны'});
+            console.error('POST /login error:', err);
+            res.status(500).json({error: err.message});
         }
     });
 
