@@ -7,7 +7,7 @@ module.exports = (pool) => {
         try {
             const result = await pool.query(`
                 SELECT t.*, 
-                       (SELECT count(*) - 1 FROM posts WHERE thread_id = t.id) as reply_count,
+                       (SELECT count(*) -1 FROM posts WHERE thread_id = t.id) as reply_count,
                        (SELECT content FROM posts WHERE thread_id = t.id ORDER BY created_at LIMIT 1) as op_content,
                        (SELECT guest_name FROM posts WHERE thread_id = t.id ORDER BY created_at LIMIT 1) as op_name
                 FROM threads t
