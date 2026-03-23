@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 module.exports = (pool) => {
-    // получить треды доски
+    // Получить треды доски
     router.get('/boards/:board/threads', async (req, res) => {
         try {
             const result = await pool.query(`
@@ -16,41 +16,54 @@ module.exports = (pool) => {
             `, [req.params.board]);
             res.json(result.rows);
         } catch(err) {
+            console.error('GET /boards/:board/threads error:', err);
             res.status(500).json({error: err.message});
         }
     });
 
+    // Создать тред
     router.post('/boards/:board/thread', async (req, res) => {
         try {
-            console.log('📝 Попытка создать тред в доске:', req.params.board);
-            console.log('📦 Тело запроса:', req.body);
-            
             const { title, content, guest_name } = req.body;
+            
+            if (!content || content.trim() === '') {
+                return res.status(400).json({error: 'Текст поста обязателен'});
+            }
+            
+            // Получаем ID доски
             const boardRes = await pool.query('SELECT id FROM boards WHERE name = $1', [req.params.board]);
+            if (boardRes.rows.length === 0) {
+                return res.status(404).json({error: 'Доска не найдена'});
+            }
             
-            console.log('📋 ID доски:', boardRes.rows[0]?.id);
+            const boardId = boardRes.rows[0].id;
             
+            // Создаём тред и первый пост в транзакции
             await pool.query('BEGIN');
+            
             const threadRes = await pool.query(
                 'INSERT INTO threads (board_id, title) VALUES ($1, $2) RETURNING id',
-                [boardRes.rows[0].id, title || 'Без темы']
+                [boardId, title || 'Без темы']
             );
+            
+            const threadId = threadRes.rows[0].id;
+            
             await pool.query(
                 'INSERT INTO posts (thread_id, guest_name, content) VALUES ($1, $2, $3)',
-                [threadRes.rows[0].id, guest_name || 'Аноним', content]
+                [threadId, guest_name || 'Аноним', content]
             );
+            
             await pool.query('COMMIT');
             
-            console.log('✅ Тред создан, ID:', threadRes.rows[0].id);
-            res.json({thread_id: threadRes.rows[0].id});
+            res.json({thread_id: threadId, success: true});
         } catch(err) {
             await pool.query('ROLLBACK');
-            console.error('❌ Ошибка создания треда:', err);
+            console.error('POST /boards/:board/thread error:', err);
             res.status(500).json({error: err.message});
         }
     });
 
-    // получить посты треда
+    // Получить посты треда
     router.get('/thread/:id/posts', async (req, res) => {
         try {
             const result = await pool.query(
@@ -59,22 +72,40 @@ module.exports = (pool) => {
             );
             res.json(result.rows);
         } catch(err) {
+            console.error('GET /thread/:id/posts error:', err);
             res.status(500).json({error: err.message});
         }
     });
 
-    // создать пост в треде
+    // Создать пост в треде
     router.post('/thread/:id/post', async (req, res) => {
         try {
+            const { content, guest_name } = req.body;
+            
+            if (!content || content.trim() === '') {
+                return res.status(400).json({error: 'Текст поста обязателен'});
+            }
+            
             await pool.query(
                 'INSERT INTO posts (thread_id, guest_name, content) VALUES ($1, $2, $3)',
-                [req.params.id, req.body.guest_name || 'Аноним', req.body.content]
+                [req.params.id, guest_name || 'Аноним', content]
             );
-            await pool.query('UPDATE threads SET bump_time = NOW() WHERE id = $1', [req.params.id]);
+            
+            await pool.query(
+                'UPDATE threads SET bump_time = NOW() WHERE id = $1',
+                [req.params.id]
+            );
+            
             res.json({success: true});
         } catch(err) {
+            console.error('POST /thread/:id/post error:', err);
             res.status(500).json({error: err.message});
         }
+    });
+    
+    // Тестовый маршрут для проверки
+    router.get('/test', (req, res) => {
+        res.json({ status: 'threads router works' });
     });
 
     return router;
