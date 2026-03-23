@@ -1,47 +1,68 @@
-* {
-    box-sizing: border-box;
-}
-
 body {
     background: #fff;
     color: #000;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+    font-family: monospace;
     margin: 0;
-    padding: 0;
-    line-height: 1.4;
+    padding: 20px;
 }
 
 .header {
     background: #0066cc;
     color: #fff;
-    padding: 15px;
-    transition: transform 0.3s ease;
-    z-index: 100;
+    padding: 10px;
+    margin-bottom: 20px;
 }
 
-.header h1 {
-    margin: 0 0 10px 0;
-    font-size: 1.5em;
-    text-align: center;
+.header a {
+    color: #fff;
+    margin-right: 15px;
+    text-decoration: none;
 }
 
 .boards {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
+    margin-top: 10px;
 }
 
-.boards a {
-    color: #fff;
-    text-decoration: none;
-    padding: 5px 12px;
-    background: rgba(255,255,255,0.2);
-    border-radius: 20px;
+.thread {
+    border: 1px solid #0066cc;
+    margin: 10px 0;
+    padding: 10px;
+    background: #fff;
+}
+
+.thread-header {
+    border-bottom: 1px solid #0066cc;
+    padding-bottom: 5px;
+    margin-bottom: 8px;
+}
+
+.thread-title {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.thread-replies {
+    float: right;
+    color: #666;
+}
+
+.op-name {
+    color: #0066cc;
     font-size: 0.9em;
 }
 
-/* ФОРМА СОЗДАНИЯ ТРЕДА */
+.op-date {
+    color: #888;
+    font-size: 0.8em;
+    margin-left: 10px;
+}
+
+.op-content {
+    margin-top: 8px;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .new-thread-form {
     background: #f0f7ff;
     padding: 15px;
@@ -52,25 +73,21 @@ body {
 .new-thread-form input,
 .new-thread-form textarea {
     width: 100%;
-    margin: 8px 0;
-    padding: 12px;
+    margin: 5px 0;
+    padding: 8px;
     border: 1px solid #ccc;
-    font-family: inherit;
-    font-size: 16px;
-    border-radius: 8px;
+    font-family: monospace;
+    box-sizing: border-box;
 }
 
-/* КНОПКИ */
 button {
     background: #0066cc;
     color: #fff;
     border: none;
-    padding: 12px 20px;
+    padding: 8px 15px;
     cursor: pointer;
     font-size: 1em;
-    border-radius: 8px;
-    width: 100%;
-    font-weight: bold;
+    margin-top: 5px;
 }
 
 button:hover {
@@ -82,161 +99,91 @@ button:disabled {
     cursor: not-allowed;
 }
 
-/* КАРТОЧКА ТРЕДА */
-.thread {
-    border: 1px solid #0066cc;
-    margin: 12px 0;
-    padding: 15px;
-    background: #fff;
-    border-radius: 10px;
-}
-
-.thread-header {
-    border-bottom: 1px solid #0066cc;
-    padding-bottom: 8px;
-    margin-bottom: 10px;
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 5px;
-}
-
-.thread-title {
-    font-weight: bold;
-    font-size: 1.1em;
-}
-
-.thread-replies {
-    color: #666;
-    font-size: 0.85em;
-    background: #f0f0f0;
-    padding: 2px 8px;
-    border-radius: 12px;
-}
-
-.op-name {
-    color: #0066cc;
-    font-weight: bold;
-}
-
-.op-date {
-    color: #888;
-    font-size: 0.75em;
-    margin-left: 10px;
-}
-
-.op-content {
-    margin-top: 10px;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-size: 0.95em;
-}
-
 .reply-link {
-    display: block;
-    margin-top: 12px;
-    background: #0066cc;
-    color: white !important;
-    text-align: center;
-    padding: 10px;
-    border-radius: 8px;
+    display: inline-block;
+    margin-top: 10px;
+    color: #0066cc;
     text-decoration: none;
-    font-weight: bold;
 }
 
+.reply-link:hover {
+    text-decoration: underline;
+}
+
+/* Страница треда */
 .thread-container {
-    max-width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 .op-post {
     background: #f0f7ff;
     border: 2px solid #0066cc;
     padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 12px;
-}
-
-.post-header {
-    color: #666;
-    font-size: 0.85em;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 8px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 8px;
-}
-
-.post-name {
-    font-weight: bold;
-    color: #0066cc;
-    font-size: 1em;
-}
-
-.post-number {
-    color: #888;
-    font-size: 0.75em;
-}
-
-.post-date {
-    color: #888;
-    font-size: 0.75em;
-}
-
-.post-content {
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-size: 0.95em;
+    margin-bottom: 30px;
+    border-radius: 5px;
 }
 
 .replies {
     margin-top: 20px;
 }
 
-.replies h3 {
-    font-size: 1.1em;
-    margin-bottom: 15px;
-}
-
-.reply-form {
-    background: #f0f0f0;
-    padding: 15px;
-    margin: 15px 0;
-    border-radius: 12px;
-}
-
-.reply-form input,
-.reply-form textarea {
-    width: 100%;
-    margin: 8px 0;
-    padding: 12px;
-    border: 1px solid #ccc;
-    font-family: inherit;
-    font-size: 16px;
-    border-radius: 8px;
-}
-
 .reply {
     border: 1px solid #ccc;
-    padding: 12px;
+    padding: 10px;
     margin: 10px 0;
     background: #fafafa;
-    border-radius: 10px;
 }
 
 .reply:hover {
     background: #f5f5f5;
 }
 
-.empty-replies {
+.reply-form {
+    background: #f0f0f0;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 5px;
+}
+
+.reply-form input,
+.reply-form textarea {
+    width: 100%;
+    margin: 5px 0;
+    padding: 8px;
+    border: 1px solid #ccc;
+    font-family: monospace;
+    box-sizing: border-box;
+}
+
+.post-header {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 8px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
+}
+
+.post-name {
+    font-weight: bold;
+    color: #0066cc;
+}
+
+.post-number {
     color: #888;
-    text-align: center;
-    padding: 30px;
-    background: #f9f9f9;
-    border: 1px dashed #ccc;
-    border-radius: 10px;
+    font-size: 0.8em;
+    margin-left: 8px;
+}
+
+.post-date {
+    margin-left: 10px;
+    font-size: 0.85em;
+}
+
+.post-content {
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .loading {
@@ -245,46 +192,68 @@ button:disabled {
     color: #666;
 }
 
+.empty-replies {
+    color: #888;
+    text-align: center;
+    padding: 30px;
+    background: #f9f9f9;
+    border: 1px dashed #ccc;
+}
+
+/*mobile*/
 @media (max-width: 768px) {
     body {
-        background: #f5f5f5;
+        padding: 10px;
+        font-size: 14px;
     }
     
     .header {
-        position: sticky;
-        top: 0;
-        padding: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        padding: 8px;
+        text-align: center;
     }
     
     .header h1 {
-        font-size: 1.3em;
-        margin-bottom: 8px;
+        font-size: 1.5em;
+        margin: 5px 0;
     }
     
     .boards {
-        gap: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 8px;
     }
     
     .boards a {
-        padding: 6px 12px;
-        font-size: 0.85em;
+        margin: 0;
+        padding: 5px 10px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 15px;
+        font-size: 0.9em;
     }
     
-    #content {
-        padding: 0 12px;
-    }
-    
+    /* Форма создания треда */
     .new-thread-form {
-        margin: 0 -12px 15px -12px;
-        border-radius: 0;
-        padding: 15px;
+        padding: 12px;
     }
     
+    .new-thread-form input,
+    .new-thread-form textarea {
+        font-size: 16px; /* Предотвращает зум на iOS */
+        padding: 10px;
+    }
+    
+    button {
+        width: 100%;
+        padding: 12px;
+        font-size: 1em;
+    }
+    
+    /* Карточка треда */
     .thread {
+        padding: 12px;
         margin: 12px 0;
-        border-radius: 12px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     
     .thread-header {
@@ -292,66 +261,134 @@ button:disabled {
         gap: 5px;
     }
     
-    .thread-replies {
-        align-self: flex-start;
+    .thread-title {
+        font-size: 1.1em;
+        display: block;
     }
     
-    .reply-link, button {
-        min-height: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .thread-replies {
+        float: none;
+        display: inline-block;
+        font-size: 0.85em;
+    }
+    
+    .op-name {
+        font-size: 0.9em;
+    }
+    
+    .op-date {
+        display: block;
+        margin-left: 0;
+        margin-top: 3px;
+    }
+    
+    .op-content {
+        font-size: 0.95em;
+        margin-top: 8px;
+    }
+    
+    .reply-link {
+        display: block;
+        text-align: center;
+        margin-top: 12px;
+        padding: 8px;
+        background: #0066cc;
+        color: white !important;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    
+    /* Страница треда */
+    .thread-container {
+        padding: 0;
     }
     
     .op-post {
-        margin: 0 -12px 20px -12px;
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
+        padding: 12px;
+        margin-bottom: 20px;
+    }
+    
+    .post-header {
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+    
+    .post-name, .post-number, .post-date {
+        display: inline-block;
+        margin: 2px 0;
+    }
+    
+    .post-date {
+        margin-left: 0;
+        display: block;
+        font-size: 0.75em;
+    }
+    
+    .post-content {
+        font-size: 0.95em;
+        word-break: break-word;
     }
     
     .reply-form {
-        margin: 15px -12px;
-        border-radius: 0;
+        padding: 12px;
+    }
+    
+    .reply-form input,
+    .reply-form textarea {
+        font-size: 16px;
+        padding: 10px;
     }
     
     .reply {
-        border-radius: 12px;
+        padding: 10px;
+        margin: 8px 0;
     }
     
-    .thread-container {
-        margin: 0 -12px;
+    .reply .post-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 5px;
     }
     
-    .replies h3 {
-        padding: 0 12px;
+    .reply .post-name {
+        font-size: 0.95em;
     }
     
-    .reply-list {
-        padding: 0 12px;
+    .reply .post-number {
+        font-size: 0.7em;
+    }
+    
+    .reply .post-date {
+        font-size: 0.7em;
     }
 }
 
+/* Для совсем маленьких экранов (до 480px) */
 @media (max-width: 480px) {
+    body {
+        padding: 5px;
+        font-size: 13px;
+    }
+    
     .header h1 {
-        font-size: 1.2em;
+        font-size: 1.3em;
     }
     
     .boards a {
-        padding: 4px 10px;
-        font-size: 0.75em;
+        padding: 4px 8px;
+        font-size: 0.8em;
     }
     
     .thread-title {
         font-size: 1em;
     }
     
-    .post-content, .op-content {
+    .op-content {
         font-size: 0.9em;
     }
     
-    .post-header {
-        font-size: 0.75em;
-        gap: 5px;
+    .post-content {
+        font-size: 0.9em;
     }
 }
