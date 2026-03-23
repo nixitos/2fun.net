@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 module.exports = (pool) => {
-    // получить комменты поста (если нужны)
+    // Получить комментарии к посту (если понадобится вложенность)
     router.get('/post/:id/comments', async (req, res) => {
         try {
             const result = await pool.query(
@@ -11,20 +11,7 @@ module.exports = (pool) => {
             );
             res.json(result.rows);
         } catch(err) {
-            res.status(500).json({error: err.message});
-        }
-    });
-
-    // создать коммент к посту
-    router.post('/post/:id/comment', async (req, res) => {
-        try {
-            const { content, guest_name } = req.body;
-            await pool.query(
-                'INSERT INTO posts (thread_id, parent_post_id, guest_name, content) VALUES ($1, $2, $3, $4)',
-                [req.body.thread_id, req.params.id, guest_name || 'Аноним', content]
-            );
-            res.json({success: true});
-        } catch(err) {
+            console.error('GET /post/:id/comments error:', err);
             res.status(500).json({error: err.message});
         }
     });
