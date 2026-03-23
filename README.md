@@ -4,5 +4,6 @@
 
 A 4chan-like project by nixitos.
 Runs on free servers — will be wiped on April 22.
+- [API Documentation](how-to-API.md)
 
 _2fun.net is not the real domain, just the site name._
