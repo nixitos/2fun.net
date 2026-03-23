@@ -18,6 +18,17 @@ body {
     margin-right: 15px;
 }
 
+.reply-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.reply-link:hover {
+    text-decoration: underline;
+}
+
 .thread {
     border: 1px solid #0066cc;
     margin: 10px 0;
