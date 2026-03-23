@@ -10,6 +10,12 @@ const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
 });
 
+app.use(cors({
+  origin: 'https://nixitos.github.io',  // или '*' для теста
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type']
+}));
+
 app.use(cors());
 app.use(express.json());
 app.use(express.static('../frontend'));
