@@ -44,7 +44,7 @@
                                         <span class="thread-replies">ответов: ${t.reply_count || 0}</span>
                                     </div>
                                     <div class="thread-op">${escapeHtml((t.op_content || '')).substring(0, 200)}</div>
-                                    <button onclick="alert('Страница треда в разработке, ID: ${t.id}')">Ответить</button>
+                                    <a href="thread.html?id=${t.id}" class="reply-link">Ответить</a>
                                 </div>
                             `).join('')}
                         </div>
