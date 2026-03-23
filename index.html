@@ -9,19 +9,19 @@
     <div class="header">
         <h1>2fun.net</h1>
         <div class="boards">
-            <a href="/?board=b">/b/</a>
-            <a href="/?board=pol">/pol/</a>
-            <a href="/?board=tech">/tech/</a>
+            <a href="?board=b">/b/</a>
+            <a href="?board=pol">/pol/</a>
+            <a href="?board=tech">/tech/</a>
         </div>
     </div>
     
     <div id="content"></div>
     
     <script>
-        let currentBoard = new URLSearchParams(location.search).get('board') || 'b';
         const API_BASE = 'https://twofun-net.onrender.com/api';
+        let currentBoard = new URLSearchParams(location.search).get('board') || 'b';
+        
         function loadThreads() {
-            const API_BASE = 'https://twofun-net.onrender.com/api';
             fetch(`${API_BASE}/boards/${currentBoard}/threads`)
                 .then(r => r.json())
                 .then(threads => {
@@ -38,16 +38,17 @@
                                 <div class="thread">
                                     <div class="thread-header">
                                         <span class="thread-title">${escapeHtml(t.title)}</span>
-                                        <span class="thread-replies">ответов: ${t.reply_count}</span>
+                                        <span class="thread-replies">ответов: ${t.reply_count || 0}</span>
                                     </div>
-                                    <div class="thread-op">${escapeHtml(t.op_content).substring(0, 200)}</div>
-                                    <a href="/thread.html?id=${t.id}">Ответить</a>
+                                    <div class="thread-op">${escapeHtml(t.op_content || '').substring(0, 200)}</div>
+                                    <button onclick="alert('страница треда пока в разработке, id: ${t.id}')">Ответить</button>
                                 </div>
                             `).join('')}
                         </div>
                     `;
                     document.getElementById('content').innerHTML = html;
-                });
+                })
+                .catch(err => console.error('Ошибка загрузки:', err));
         }
         
         function createThread() {
@@ -63,6 +64,7 @@
         }
         
         function escapeHtml(text) {
+            if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
