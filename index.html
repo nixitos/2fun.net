@@ -23,7 +23,10 @@
         
         function loadThreads() {
             fetch(`${API_BASE}/boards/${currentBoard}/threads`)
-                .then(r => r.json())
+                .then(r => {
+                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                    return r.json();
+                })
                 .then(threads => {
                     const html = `
                         <div class="new-thread-form">
@@ -34,21 +37,24 @@
                             <button onclick="createThread()">Создать</button>
                         </div>
                         <div class="threads">
-                            ${threads.map(t => `
+                            ${threads.length === 0 ? '<p>Тредов пока нет. Создай первый!</p>' : threads.map(t => `
                                 <div class="thread">
                                     <div class="thread-header">
-                                        <span class="thread-title">${escapeHtml(t.title)}</span>
+                                        <span class="thread-title">${escapeHtml(t.title || 'Без темы')}</span>
                                         <span class="thread-replies">ответов: ${t.reply_count || 0}</span>
                                     </div>
-                                    <div class="thread-op">${escapeHtml(t.op_content || '').substring(0, 200)}</div>
-                                    <button onclick="alert('страница треда пока в разработке, id: ${t.id}')">Ответить</button>
+                                    <div class="thread-op">${escapeHtml((t.op_content || '')).substring(0, 200)}</div>
+                                    <button onclick="alert('Страница треда в разработке, ID: ${t.id}')">Ответить</button>
                                 </div>
                             `).join('')}
                         </div>
                     `;
                     document.getElementById('content').innerHTML = html;
                 })
-                .catch(err => console.error('Ошибка загрузки:', err));
+                .catch(err => {
+                    console.error('Ошибка загрузки:', err);
+                    document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка загрузки тредов. Проверь консоль.</p>';
+                });
         }
         
         function createThread() {
@@ -56,11 +62,34 @@
             const content = document.getElementById('threadContent').value;
             const guest_name = document.getElementById('threadName').value;
             
-            fetch(`${API_BASE}/boards/${currentBoard}/threads`, {
+            if (!content.trim()) {
+                alert('Введите текст поста');
+                return;
+            }
+            
+            fetch(`${API_BASE}/boards/${currentBoard}/thread`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({title, content, guest_name})
-            }).then(() => loadThreads());
+            })
+            .then(r => {
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                return r.json();
+            })
+            .then(data => {
+                if (data.thread_id) {
+                    document.getElementById('threadTitle').value = '';
+                    document.getElementById('threadContent').value = '';
+                    document.getElementById('threadName').value = '';
+                    loadThreads();
+                } else {
+                    alert('Ошибка: ' + (data.error || 'неизвестная'));
+                }
+            })
+            .catch(err => {
+                console.error('Ошибка создания:', err);
+                alert('Не удалось создать тред: ' + err.message);
+            });
         }
         
         function escapeHtml(text) {
