@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>2fun - тред</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <h1><a href="/2fun.net/?board=b" style="color: white; text-decoration: none;">2fun.net</a></h1>
+        <div class="boards">
+            <a href="/2fun.net/?board=b">/b/</a>
+            <a href="/2fun.net/?board=pol">/pol/</a>
+            <a href="/2fun.net/?board=tech">/tech/</a>
+        </div>
+    </div>
+    
+    <div id="content">
+        <div class="loading">Загрузка...</div>
+    </div>
+    
+    <script>
+        const API_BASE = 'https://twofun-net.onrender.com/api';
+        const urlParams = new URLSearchParams(location.search);
+        const threadId = urlParams.get('id');
+        
+        if (!threadId) {
+            window.location.href = '/2fun.net/';
+        }
+        
+        let currentBoard = 'b';
+        
+        function loadThread() {
+            // Сначала получаем информацию о треде (чтобы узнать доску)
+            fetch(`${API_BASE}/thread/${threadId}/posts`)
+                .then(r => r.json())
+                .then(posts => {
+                    if (posts.length === 0) {
+                        document.getElementById('content').innerHTML = '<p>Тред не найден</p>';
+                        return;
+                    }
+                    
+                    const op = posts[0];
+                    
+                    const html = `
+                        <div class="thread-container">
+                            <div class="op-post">
+                                <div class="post-header">
+                                    <span class="post-name">${escapeHtml(op.guest_name || 'Аноним')}</span>
+                                    <span class="post-date">${new Date(op.created_at).toLocaleString()}</span>
+                                </div>
+                                <div class="post-title">${escapeHtml(op.title || '')}</div>
+                                <div class="post-content">${escapeHtml(op.content).replace(/\n/g, '<br>')}</div>
+                            </div>
+                            
+                            <div class="replies">
+                                <h3>Ответы (${posts.length - 1})</h3>
+                                <div class="reply-form">
+                                    <input type="text" id="replyName" placeholder="Имя (Аноним)">
+                                    <textarea id="replyContent" placeholder="Текст ответа" rows="3"></textarea>
+                                    <button onclick="createReply()">Ответить</button>
+                                </div>
+                                <div class="reply-list">
+                                    ${posts.slice(1).map(post => `
+                                        <div class="reply">
+                                            <div class="post-header">
+                                                <span class="post-name">${escapeHtml(post.guest_name || 'Аноним')}</span>
+                                                <span class="post-date">${new Date(post.created_at).toLocaleString()}</span>
+                                            </div>
+                                            <div class="post-content">${escapeHtml(post.content).replace(/\n/g, '<br>')}</div>
+                                        </div>
+                                    `).join('')}
+                                    ${posts.length === 1 ? '<p>Пока нет ответов. Будь первым!</p>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('content').innerHTML = html;
+                })
+                .catch(err => {
+                    console.error('Ошибка:', err);
+                    document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка загрузки треда</p>';
+                });
+        }
+        
+        function createReply() {
+            const name = document.getElementById('replyName').value;
+            const content = document.getElementById('replyContent').value;
+            
+            if (!content.trim()) {
+                alert('Введите текст ответа');
+                return;
+            }
+            
+            fetch(`${API_BASE}/thread/${threadId}/post`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    guest_name: name,
+                    content: content
+                })
+            })
+            .then(r => {
+                if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                return r.json();
+            })
+            .then(() => {
+                document.getElementById('replyContent').value = '';
+                loadThread(); // перезагружаем чтобы увидеть новый ответ
+            })
+            .catch(err => {
+                console.error('Ошибка:', err);
+                alert('Не удалось отправить ответ');
+            });
+        }
+        
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        loadThread();
+    </script>
+</body>
+</html>
