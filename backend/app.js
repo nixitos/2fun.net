@@ -12,15 +12,14 @@ const pool = new Pool({
 });
 
 app.use(cors({
-  origin: 'https://nixitos.github.io',  // или '*' для теста
+  origin: 'https://nixitos.github.io',
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type']
 }));
 
-app.use(cors());
 app.use(express.json());
-app.use(express.static('../frontend'));
 
+// Роуты
 const postsRoutes = require('./routes/posts')(pool);
 const threadsRoutes = require('./routes/threads')(pool);
 const authRoutes = require('./routes/auth')(pool);
@@ -29,6 +28,52 @@ app.use('/api', postsRoutes);
 app.use('/api', threadsRoutes);
 app.use('/api/auth', authRoutes);
 
-app.listen(port, () => {
-    console.log(`Сервер на ${port}`);
+// Тестовый маршрут
+app.get('/ping', (req, res) => {
+    res.json({ status: 'ok' });
+});
+
+// Инициализация таблиц в БД
+const initDb = async () => {
+    try {
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS boards (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(50) UNIQUE,
+                description TEXT
+            );
+            
+            CREATE TABLE IF NOT EXISTS threads (
+                id SERIAL PRIMARY KEY,
+                board_id INTEGER REFERENCES boards(id),
+                title VARCHAR(200),
+                created_at TIMESTAMP DEFAULT NOW(),
+                bump_time TIMESTAMP DEFAULT NOW()
+            );
+            
+            CREATE TABLE IF NOT EXISTS posts (
+                id SERIAL PRIMARY KEY,
+                thread_id INTEGER REFERENCES threads(id),
+                guest_name VARCHAR(50),
+                content TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT NOW()
+            );
+            
+            INSERT INTO boards (name, description) VALUES 
+                ('b', 'Общий срач'),
+                ('pol', 'Политика'),
+                ('tech', 'Техно')
+            ON CONFLICT (name) DO NOTHING;
+        `);
+        console.log('✅ База инициализирована');
+    } catch(err) {
+        console.error('❌ Ошибка инициализации БД:', err.message);
+    }
+};
+
+// Запуск
+initDb().then(() => {
+    app.listen(port, () => {
+        console.log(`Сервер на ${port}`);
+    });
 });
