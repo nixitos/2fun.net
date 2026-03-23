@@ -19,7 +19,7 @@
     
     <script>
         let currentBoard = new URLSearchParams(location.search).get('board') || 'b';
-        
+        const API_BASE = 'https://twofun-net.onrender.com/api';
         function loadThreads() {
             const API_BASE = 'https://twofun-net.onrender.com/api';
             fetch(`${API_BASE}/boards/${currentBoard}/threads`)
