@@ -20,11 +20,15 @@ module.exports = (pool) => {
         }
     });
 
-    // создать тред
     router.post('/boards/:board/thread', async (req, res) => {
         try {
+            console.log('📝 Попытка создать тред в доске:', req.params.board);
+            console.log('📦 Тело запроса:', req.body);
+            
             const { title, content, guest_name } = req.body;
             const boardRes = await pool.query('SELECT id FROM boards WHERE name = $1', [req.params.board]);
+            
+            console.log('📋 ID доски:', boardRes.rows[0]?.id);
             
             await pool.query('BEGIN');
             const threadRes = await pool.query(
@@ -37,9 +41,11 @@ module.exports = (pool) => {
             );
             await pool.query('COMMIT');
             
+            console.log('✅ Тред создан, ID:', threadRes.rows[0].id);
             res.json({thread_id: threadRes.rows[0].id});
         } catch(err) {
             await pool.query('ROLLBACK');
+            console.error('❌ Ошибка создания треда:', err);
             res.status(500).json({error: err.message});
         }
     });
