@@ -28,6 +28,13 @@
                     return r.json();
                 })
                 .then(threads => {
+                    // Сортируем: сначала новые (по bump_time или created_at)
+                    const sorted = [...threads].sort((a, b) => {
+                        const dateA = new Date(a.bump_time || a.created_at);
+                        const dateB = new Date(b.bump_time || b.created_at);
+                        return dateB - dateA;
+                    });
+                    
                     const html = `
                         <div class="new-thread-form">
                             <h3>Создать тред</h3>
@@ -37,13 +44,17 @@
                             <button onclick="createThread()">Создать</button>
                         </div>
                         <div class="threads">
-                            ${threads.length === 0 ? '<p>Тредов пока нет. Создай первый!</p>' : threads.map(t => `
+                            ${sorted.length === 0 ? '<p>Тредов пока нет. Создай первый!</p>' : sorted.map(t => `
                                 <div class="thread">
                                     <div class="thread-header">
                                         <span class="thread-title">${escapeHtml(t.title || 'Без темы')}</span>
                                         <span class="thread-replies">ответов: ${t.reply_count || 0}</span>
                                     </div>
-                                    <div class="thread-op">${escapeHtml((t.op_content || '')).substring(0, 200)}</div>
+                                    <div class="thread-op">
+                                        <span class="op-name"><strong>${escapeHtml(t.op_name || 'Аноним')}</strong></span>
+                                        <span class="op-date">${formatDate(t.created_at)}</span>
+                                        <div class="op-content">${escapeHtml((t.op_content || '')).substring(0, 200)}</div>
+                                    </div>
                                     <a href="thread.html?id=${t.id}" class="reply-link">Ответить</a>
                                 </div>
                             `).join('')}
@@ -67,6 +78,10 @@
                 return;
             }
             
+            const btn = document.querySelector('.new-thread-form button');
+            btn.disabled = true;
+            btn.textContent = 'Создаю...';
+            
             fetch(`${API_BASE}/boards/${currentBoard}/thread`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -89,6 +104,20 @@
             .catch(err => {
                 console.error('Ошибка создания:', err);
                 alert('Не удалось создать тред: ' + err.message);
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.textContent = 'Создать';
+            });
+        }
+        
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
             });
         }
         
