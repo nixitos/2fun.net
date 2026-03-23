@@ -21,7 +21,8 @@
         let currentBoard = new URLSearchParams(location.search).get('board') || 'b';
         
         function loadThreads() {
-            fetch(`/api/boards/${currentBoard}/threads`)
+            const API_BASE = 'https://twofun-net.onrender.com/api';
+            fetch(`${API_BASE}/boards/${currentBoard}/threads`)
                 .then(r => r.json())
                 .then(threads => {
                     const html = `
@@ -54,7 +55,7 @@
             const content = document.getElementById('threadContent').value;
             const guest_name = document.getElementById('threadName').value;
             
-            fetch(`/api/boards/${currentBoard}/thread`, {
+            fetch(`${API_BASE}/boards/${currentBoard}/threads`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({title, content, guest_name})
