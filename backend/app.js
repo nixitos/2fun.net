@@ -14,7 +14,7 @@ const pool = new Pool({
 
 // CORS для GitHub Pages
 app.use(cors({
-    origin: ['https://nixitos.github.io', 'http://localhost:3000'],
+    origin: '*', //как API для кастомных клиентов
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type']
 }));
