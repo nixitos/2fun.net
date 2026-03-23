@@ -130,28 +130,5 @@
         
         loadThreads();
     </script>
-    <script>
-        function isMobile() {
-            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        }
-        
-        if (isMobile()) {
-            document.body.classList.add('mobile-view');
-            
-            // Сворачиваем шапку при скролле
-            let lastScroll = 0;
-            const header = document.querySelector('.header');
-            
-            window.addEventListener('scroll', () => {
-                const currentScroll = window.pageYOffset;
-                if (currentScroll > lastScroll && currentScroll > 100) {
-                    header.style.transform = 'translateY(-100%)';
-                } else {
-                    header.style.transform = 'translateY(0)';
-                }
-                lastScroll = currentScroll;
-            });
-        }
-    </script>
 </body>
 </html>
