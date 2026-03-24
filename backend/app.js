@@ -19,6 +19,22 @@ app.use(cors({
 
 app.use(express.json());
 
+const rateLimit = require('express-rate-limit');
+
+// лимит 30 запросов в минуту с одного IP чтобы мне к херам серваки не снесли
+const limiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,
+    message: { error: 'Слишком много запросов. Подожди минуту.' },
+    standardHeaders: true, // отправлять rate limit в заголовки
+    legacyHeaders: false,
+    skip: (req) => {
+        return false;
+    }
+});
+
+app.use('/api', limiter);
+
 const initDb = async () => {
     try {
         await pool.query(`
