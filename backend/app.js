@@ -6,17 +6,18 @@ const { Pool } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors({
-    origin: '*',
-    methods: ['GET', 'POST', 'OPTIONS'],
-    allowedHeaders: ['Content-Type']
-}));
-app.use(express.json());
-
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
+
+app.use(cors({
+    origin: ['https://nixitos.github.io', 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type']
+}));
+
+app.use(express.json());
 
 const initDb = async () => {
     try {
@@ -49,10 +50,9 @@ const initDb = async () => {
                 ('tech', 'Техно')
             ON CONFLICT (name) DO NOTHING;
         `);
-        console.log('База инициализирована');
+        console.log('✅ База инициализирована');
     } catch(err) {
-        console.error('Ошибка инициализации БД:', err.message);
-        throw err;
+        console.error('❌ Ошибка инициализации БД:', err.message);
     }
 };
 
@@ -66,16 +66,8 @@ app.get('/ping', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
-const start = async () => {
-    try {
-        await initDb();
-        app.listen(port, '0.0.0.0', () => {
-            console.log(`Сервер запущен на порту ${port}`);
-        });
-    } catch (err) {
-        console.error('Фатальная ошибка:', err.message);
-        process.exit(1);
-    }
-};
-
-start();
+initDb().then(() => {
+    app.listen(port, () => {
+        console.log(`🚀 Сервер на ${port}`);
+    });
+});
