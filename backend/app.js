@@ -6,6 +6,13 @@ const { Pool } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// СНАЧАЛА создаём pool
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
+
+// ПОТОМ тестируем подключение
 pool.connect((err, client, release) => {
     if (err) {
         console.error('❌ Ошибка подключения к БД:', err.message);
@@ -15,22 +22,14 @@ pool.connect((err, client, release) => {
     }
 });
 
-// Подключение к БД
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-});
-
-// CORS для GitHub Pages
 app.use(cors({
-    origin: '*', //как API для кастомных клиентов
+    origin: ['https://nixitos.github.io', 'http://localhost:3000', '*'],
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type']
 }));
 
 app.use(express.json());
 
-// Инициализация таблиц
 const initDb = async () => {
     try {
         await pool.query(`
@@ -68,21 +67,16 @@ const initDb = async () => {
     }
 };
 
-// Роуты
 const postsRoutes = require('./routes/posts')(pool);
 const threadsRoutes = require('./routes/threads')(pool);
-const authRoutes = require('./routes/auth')(pool);
 
 app.use('/api', postsRoutes);
 app.use('/api', threadsRoutes);
-app.use('/api/auth', authRoutes);
 
-// Тестовый маршрут
 app.get('/ping', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
 });
 
-// Запуск
 initDb().then(() => {
     app.listen(port, () => {
         console.log(`🚀 Сервер запущен на порту ${port}`);
