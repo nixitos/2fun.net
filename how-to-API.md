@@ -10,7 +10,7 @@ All responses are JSON. CORS is enabled for all origins.
 
 ### Get threads in a board
 
-`GET /boards/:board/threads`
+`GET /boards/:board/thread`
 
 `board` = `b`, `pol`, `tech`
 
@@ -115,7 +115,7 @@ Error response:
 
 **Get all threads in /b/:**
 ```
-GET https://twofun-net.onrender.com/api/boards/b/threads
+GET https://twofun-net.onrender.com/api/boards/b/thread
 ```
 
 **Create a thread:**
