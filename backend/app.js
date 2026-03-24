@@ -6,6 +6,15 @@ const { Pool } = require('pg');
 const app = express();
 const port = process.env.PORT || 3000;
 
+pool.connect((err, client, release) => {
+    if (err) {
+        console.error('❌ Ошибка подключения к БД:', err.message);
+    } else {
+        console.log('✅ Подключение к БД успешно');
+        release();
+    }
+});
+
 // Подключение к БД
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
