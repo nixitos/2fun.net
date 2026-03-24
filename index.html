@@ -24,7 +24,7 @@
         let currentBoard = new URLSearchParams(location.search).get('board') || 'b';
         
         function loadThreads() {
-            fetch(`${API_BASE}/boards/${currentBoard}/threads`)
+            fetch(`${API_BASE}/boards/${currentBoard}/thread`)
                 .then(r => {
                     if (!r.ok) throw new Error(`HTTP ${r.status}`);
                     return r.json();
