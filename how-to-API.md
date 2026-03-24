@@ -100,6 +100,7 @@ All responses are JSON. CORS is enabled for all origins.
 |--------|---------|
 | 400 | Missing content |
 | 404 | Board or thread not found |
+| 429 | Too many requests, anti-DDoS/DoS |
 | 500 | Server error |
 
 Error response:
