@@ -3,7 +3,7 @@ const router = express.Router();
 
 module.exports = (pool) => {
     // Получить треды доски (с именем автора)
-    router.get('/boards/:board/threads', async (req, res) => {
+    router.get('/boards/:board/thread', async (req, res) => {
         try {
             const result = await pool.query(`
                 SELECT t.*, 
@@ -17,7 +17,7 @@ module.exports = (pool) => {
             `, [req.params.board]);
             res.json(result.rows);
         } catch(err) {
-            console.error('GET /boards/:board/threads error:', err);
+            console.error('GET /boards/:board/thread error:', err);
             res.status(500).json({error: err.message});
         }
     });
