@@ -1,8 +1,24 @@
 const express = require('express');
 const router = express.Router();
 
+const cooldown = new Map();
+
+function checkCooldown(ip, action, seconds) {
+    const key = `${ip}:${action}`;
+    const last = cooldown.get(key);
+    const now = Date.now();
+    
+    if (last && (now - last) < seconds * 1000) {
+        const remaining = Math.ceil((seconds * 1000 - (now - last)) / 1000);
+        return { allowed: false, remaining };
+    }
+    
+    cooldown.set(key, now);
+    setTimeout(() => cooldown.delete(key), seconds * 1000);
+    return { allowed: true };
+}
+
 module.exports = (pool) => {
-    // Получить треды доски (с именем автора)
     router.get('/boards/:board/thread', async (req, res) => {
         try {
             const result = await pool.query(`
@@ -24,6 +40,14 @@ module.exports = (pool) => {
 
     router.post('/boards/:board/thread', async (req, res) => {
         try {
+            const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+            const cd = checkCooldown(ip, 'create_thread', 10);
+            if (!cd.allowed) {
+                return res.status(429).json({ 
+                    error: `Слишком часто. Подожди ${cd.remaining} сек.` 
+                });
+            }
+            
             const { title, content, guest_name } = req.body;
             
             if (!content || content.trim() === '') {
@@ -58,7 +82,6 @@ module.exports = (pool) => {
         }
     });
 
-    // Получить посты треда
     router.get('/thread/:id/posts', async (req, res) => {
         try {
             const result = await pool.query(
@@ -72,9 +95,16 @@ module.exports = (pool) => {
         }
     });
 
-    // Создать пост в треде
     router.post('/thread/:id/post', async (req, res) => {
         try {
+            const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+            const cd = checkCooldown(ip, 'create_post', 1);
+            if (!cd.allowed) {
+                return res.status(429).json({ 
+                    error: `Слишком часто. Подожди ${cd.remaining} сек.` 
+                });
+            }
+            
             const { content, guest_name } = req.body;
             
             if (!content || content.trim() === '') {
