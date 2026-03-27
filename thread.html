@@ -11,15 +11,11 @@
 <body>
     <div class="header">
         <h1><a href="/2fun.net/?board=b" style="color: white; text-decoration: none;">2fun.net</a></h1>
-        <div class="boards">
-            <a href="?board=b">общий</a>
-            <a href="?board=pol">политика</a>
-            <a href="?board=tech">технологии</a>
-        </div>
+        <div class="boards" id="boards-container"></div>
     </div>
     
     <div id="content">
-        <div class="loading">Загрузка...</div>
+        <div class="loading" id="loading-text">Загрузка...</div>
     </div>
     
     <script>
@@ -31,14 +27,73 @@
             window.location.href = '/2fun.net/';
         }
         
+        // Локализация
+        const translations = {
+            ru: {
+                loading: "Загрузка...",
+                thread_not_found: "Тред не найден",
+                replies: "Ответы",
+                reply_name_placeholder: "Имя (Аноним)",
+                reply_content_placeholder: "Текст ответа",
+                reply_button: "Ответить",
+                sending: "Отправка...",
+                empty_replies: "Пока нет ответов. Будь первым!",
+                error_load: "Ошибка загрузки треда. Проверь консоль.",
+                error_empty: "Введите текст ответа",
+                error_send: "Не удалось отправить ответ: ",
+                boards: {
+                    b: "общий",
+                    pol: "политика",
+                    tech: "технологии"
+                }
+            },
+            en: {
+                loading: "Loading...",
+                thread_not_found: "Thread not found",
+                replies: "Replies",
+                reply_name_placeholder: "Name (Anonymous)",
+                reply_content_placeholder: "Reply text",
+                reply_button: "Reply",
+                sending: "Sending...",
+                empty_replies: "No replies yet. Be the first!",
+                error_load: "Failed to load thread. Check console.",
+                error_empty: "Enter reply text",
+                error_send: "Failed to send reply: ",
+                boards: {
+                    b: "general",
+                    pol: "politics",
+                    tech: "technology"
+                }
+            }
+        };
+        
+        // Определяем язык по браузеру
+        let currentLang = navigator.language.startsWith('ru') ? 'ru' : 'en';
+        // =================================
+        
         let allPosts = [];
         
+        // Рендерим кнопки досок
+        function renderBoards() {
+            const boardsContainer = document.getElementById('boards-container');
+            const boards = translations[currentLang].boards;
+            const currentBoard = new URLSearchParams(location.search).get('board') || 'b';
+            let html = '';
+            for (const [id, name] of Object.entries(boards)) {
+                html += `<a href="?board=${id}" ${id === currentBoard ? 'class="active"' : ''}>${name}</a>`;
+            }
+            boardsContainer.innerHTML = html;
+        }
+        
         function loadThread() {
+            const t = translations[currentLang];
+            document.getElementById('loading-text').textContent = t.loading;
+            
             fetch(`${API_BASE}/thread/${threadId}/posts`)
                 .then(r => r.json())
                 .then(posts => {
                     if (!posts || posts.length === 0) {
-                        document.getElementById('content').innerHTML = '<p>Тред не найден</p>';
+                        document.getElementById('content').innerHTML = `<p>${t.thread_not_found}</p>`;
                         return;
                     }
                     
@@ -47,33 +102,33 @@
                     const replies = posts.slice(1);
                     const replyCount = replies.length;
                     
+                    const defaultName = currentLang === 'ru' ? 'Аноним' : 'Anonymous';
+                    
                     const html = `
                         <div class="thread-container">
                             <div class="op-post">
                                 <div class="post-header">
-                                    <span class="post-name">${escapeHtml(op.guest_name || 'Аноним')}</span>
-                                    <span class="post-number">№${op.id}</span>
+                                    <span class="post-name">${escapeHtml(op.guest_name || defaultName)}</span>
                                     <span class="post-date">${formatDate(op.created_at)}</span>
                                 </div>
                                 <div class="post-content">${escapeHtml(op.content).replace(/\n/g, '<br>')}</div>
                             </div>
                             
                             <div class="replies">
-                                <h3>Ответы (${replyCount})</h3>
+                                <h3>${t.replies} (${replyCount})</h3>
                                 
                                 <div class="reply-form">
-                                    <input type="text" id="replyName" placeholder="Имя (Аноним)" maxlength="30">
-                                    <textarea id="replyContent" placeholder="Текст ответа" rows="3"></textarea>
-                                    <button onclick="createReply()">Ответить</button>
+                                    <input type="text" id="replyName" placeholder="${t.reply_name_placeholder}" maxlength="30">
+                                    <textarea id="replyContent" placeholder="${t.reply_content_placeholder}" rows="3"></textarea>
+                                    <button onclick="createReply()">${t.reply_button}</button>
                                 </div>
                                 
                                 <div class="reply-list">
-                                    ${replyCount === 0 ? '<p class="empty-replies">Пока нет ответов. Будь первым!</p>' : 
+                                    ${replyCount === 0 ? `<p class="empty-replies">${t.empty_replies}</p>` : 
                                         replies.map(post => `
                                             <div class="reply" id="post-${post.id}">
                                                 <div class="post-header">
-                                                    <span class="post-name"><strong>${escapeHtml(post.guest_name || 'Аноним')}</strong></span>
-                                                    <span class="post-number">№${post.id}</span>
+                                                    <span class="post-name"><strong>${escapeHtml(post.guest_name || defaultName)}</strong></span>
                                                     <span class="post-date">${formatDate(post.created_at)}</span>
                                                 </div>
                                                 <div class="post-content">${escapeHtml(post.content).replace(/\n/g, '<br>')}</div>
@@ -86,7 +141,6 @@
                     `;
                     document.getElementById('content').innerHTML = html;
                     
-                    // Скроллим к последнему ответу, если есть якорь
                     if (location.hash && location.hash.startsWith('#post-')) {
                         const target = document.querySelector(location.hash);
                         if (target) target.scrollIntoView({ behavior: 'smooth' });
@@ -94,28 +148,29 @@
                 })
                 .catch(err => {
                     console.error('Ошибка:', err);
-                    document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка загрузки треда. Проверь консоль.</p>';
+                    document.getElementById('content').innerHTML = `<p style="color: red;">${translations[currentLang].error_load}</p>`;
                 });
         }
         
         function createReply() {
             const name = document.getElementById('replyName').value.trim();
             const content = document.getElementById('replyContent').value.trim();
+            const t = translations[currentLang];
             
             if (!content) {
-                alert('Введите текст ответа');
+                alert(t.error_empty);
                 return;
             }
             
             const btn = document.querySelector('.reply-form button');
             btn.disabled = true;
-            btn.textContent = 'Отправка...';
+            btn.textContent = t.sending;
             
             fetch(`${API_BASE}/thread/${threadId}/post`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
-                    guest_name: name || 'Аноним',
+                    guest_name: name || (currentLang === 'ru' ? 'Аноним' : 'Anonymous'),
                     content: content
                 })
             })
@@ -125,13 +180,13 @@
             })
             .then(() => {
                 document.getElementById('replyContent').value = '';
-                loadThread(); // перезагружаем
+                loadThread();
             })
             .catch(err => {
                 console.error('Ошибка:', err);
-                alert('Не удалось отправить ответ: ' + err.message);
+                alert(t.error_send + err.message);
                 btn.disabled = false;
-                btn.textContent = 'Ответить';
+                btn.textContent = t.reply_button;
             });
         }
         
@@ -153,6 +208,8 @@
             return div.innerHTML;
         }
         
+        // Инициализация
+        renderBoards();
         loadThread();
     </script>
 </body>
