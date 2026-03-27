@@ -5,7 +5,8 @@
 
 A 4chan-like project by nixitos. Every here - is free.
 
->[API Documentation](how-to-API.md)
+>[API Documentation](how-to-API.md)\
+>[Telegram Channel(RU/EN)](https://t.me/twofunnet)
 
 > - [x] Making Anti-DDoS system
 > - [x] Going in new data-servers
