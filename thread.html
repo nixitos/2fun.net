@@ -11,7 +11,6 @@
 <body>
     <div class="header">
         <h1><a href="/2fun.net/?board=b" style="color: white; text-decoration: none;">2fun.net</a></h1>
-        <div class="boards" id="boards-container"></div>
     </div>
     
     <div id="content">
@@ -40,12 +39,7 @@
                 empty_replies: "Пока нет ответов. Будь первым!",
                 error_load: "Ошибка загрузки треда. Проверь консоль.",
                 error_empty: "Введите текст ответа",
-                error_send: "Не удалось отправить ответ: ",
-                boards: {
-                    b: "общий",
-                    pol: "политика",
-                    tech: "технологии"
-                }
+                error_send: "Не удалось отправить ответ: "
             },
             en: {
                 loading: "Loading...",
@@ -58,12 +52,7 @@
                 empty_replies: "No replies yet. Be the first!",
                 error_load: "Failed to load thread. Check console.",
                 error_empty: "Enter reply text",
-                error_send: "Failed to send reply: ",
-                boards: {
-                    b: "general",
-                    pol: "politics",
-                    tech: "technology"
-                }
+                error_send: "Failed to send reply: "
             }
         };
         
@@ -72,18 +61,6 @@
         // =================================
         
         let allPosts = [];
-        
-        // Рендерим кнопки досок
-        function renderBoards() {
-            const boardsContainer = document.getElementById('boards-container');
-            const boards = translations[currentLang].boards;
-            const currentBoard = new URLSearchParams(location.search).get('board') || 'b';
-            let html = '';
-            for (const [id, name] of Object.entries(boards)) {
-                html += `<a href="?board=${id}" ${id === currentBoard ? 'class="active"' : ''}>${name}</a>`;
-            }
-            boardsContainer.innerHTML = html;
-        }
         
         function loadThread() {
             const t = translations[currentLang];
@@ -209,7 +186,6 @@
         }
         
         // Инициализация
-        renderBoards();
         loadThread();
     </script>
 </body>
