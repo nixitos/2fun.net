@@ -244,28 +244,33 @@ button:disabled {
     
     /* Форма создания треда */
     .new-thread-form {
-        padding: 15px;
-        margin-bottom: 20px;
+        padding: 12px;
+        margin-bottom: 15px;
         border-radius: 12px;
     }
     
     .new-thread-form h3 {
-        font-size: 18px;
-        margin: 0 0 12px 0;
+        font-size: 16px;
+        margin: 0 0 8px 0;
     }
     
     .new-thread-form input,
     .new-thread-form textarea {
-        font-size: 15px;
-        padding: 10px;
-        margin: 8px 0;
-        border-radius: 10px;
+        font-size: 14px;
+        padding: 8px 10px;
+        margin: 6px 0;
+        border-radius: 8px;
+    }
+    
+    .new-thread-form textarea {
+        min-height: 60px;
     }
     
     .new-thread-form button {
-        font-size: 16px;
-        padding: 10px;
-        border-radius: 10px;
+        font-size: 14px;
+        padding: 8px;
+        border-radius: 8px;
+        margin-top: 6px;
     }
     
     /* Карточка треда */
