@@ -21,11 +21,7 @@
                      style="height: 30px; width: auto; margin-left: 10px; vertical-align: middle;">
             </a>
         </div>
-        <div class="boards">
-            <a href="?board=b">общий</a>
-            <a href="?board=pol">политика</a>
-            <a href="?board=tech">технологии</a>
-        </div>
+        <div class="boards" id="boards-container"></div>
     </div>
         
     <div id="content"></div>
@@ -34,6 +30,78 @@
         const API_BASE = 'https://twofun-net.onrender.com/api';
         let currentBoard = new URLSearchParams(location.search).get('board') || 'b';
         
+        // Локализация
+        const translations = {
+            ru: {
+                title: "2fun - every hate u",
+                create_thread: "Создать тред",
+                thread_title_placeholder: "Тема (необязательно)",
+                thread_content_placeholder: "Текст поста",
+                thread_name_placeholder: "Имя (Аноним)",
+                create_button: "Создать",
+                no_threads: "Тредов пока нет. Создай первый!",
+                replies: "ответов: ",
+                reply_link: "Ответить",
+                error_load: "Ошибка загрузки тредов. Попробуйте позже.",
+                error_empty: "Введите текст поста",
+                error_create: "Не удалось создать тред: ",
+                creating: "Создаю...",
+                boards: {
+                    b: "общий",
+                    pol: "политика",
+                    tech: "технологии"
+                }
+            },
+            en: {
+                title: "2fun - every hate u",
+                create_thread: "Create thread",
+                thread_title_placeholder: "Subject (optional)",
+                thread_content_placeholder: "Post text",
+                thread_name_placeholder: "Name (Anonymous)",
+                create_button: "Create",
+                no_threads: "No threads yet. Be the first!",
+                replies: "replies: ",
+                reply_link: "Reply",
+                error_load: "Failed to load threads. Try again later.",
+                error_empty: "Enter post text",
+                error_create: "Failed to create thread: ",
+                creating: "Creating...",
+                boards: {
+                    b: "general",
+                    pol: "politics",
+                    tech: "technology"
+                }
+            }
+        };
+        
+        // Определяем язык по браузеру
+        let currentLang = navigator.language.startsWith('ru') ? 'ru' : 'en';
+        document.title = translations[currentLang].title;
+        // =================================
+        
+        // Рендерим кнопки досок
+        function renderBoards() {
+            const boardsContainer = document.getElementById('boards-container');
+            const boards = translations[currentLang].boards;
+            let html = '';
+            for (const [id, name] of Object.entries(boards)) {
+                html += `<a href="?board=${id}" ${id === currentBoard ? 'class="active"' : ''}>${name}</a>`;
+            }
+            boardsContainer.innerHTML = html;
+            
+            // Добавляем обработчики, чтобы обновлять currentBoard без перезагрузки
+            document.querySelectorAll('.boards a').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const url = new URL(link.href);
+                    currentBoard = url.searchParams.get('board');
+                    history.pushState(null, '', `?board=${currentBoard}`);
+                    renderBoards(); // обновляем активный класс
+                    loadThreads();
+                });
+            });
+        }
+        
         function loadThreads() {
             fetch(`${API_BASE}/boards/${currentBoard}/thread`)
                 .then(r => {
@@ -41,34 +109,37 @@
                     return r.json();
                 })
                 .then(threads => {
-                    // Сортируем: сначала новые
                     const sorted = [...threads].sort((a, b) => {
                         const dateA = new Date(a.bump_time || a.created_at);
                         const dateB = new Date(b.bump_time || b.created_at);
                         return dateB - dateA;
                     });
                     
+                    const t = translations[currentLang];
+                    const defaultTitle = currentLang === 'ru' ? 'Без темы' : 'No title';
+                    const defaultName = currentLang === 'ru' ? 'Аноним' : 'Anonymous';
+                    
                     const html = `
                         <div class="new-thread-form">
-                            <h3>Создать тред</h3>
-                            <input type="text" id="threadTitle" placeholder="Тема (необязательно)">
-                            <textarea id="threadContent" placeholder="Текст поста" rows="3"></textarea>
-                            <input type="text" id="threadName" placeholder="Имя (Аноним)">
-                            <button onclick="createThread()">Создать</button>
+                            <h3>${t.create_thread}</h3>
+                            <input type="text" id="threadTitle" placeholder="${t.thread_title_placeholder}">
+                            <textarea id="threadContent" placeholder="${t.thread_content_placeholder}" rows="3"></textarea>
+                            <input type="text" id="threadName" placeholder="${t.thread_name_placeholder}">
+                            <button onclick="createThread()">${t.create_button}</button>
                         </div>
                         <div class="threads">
-                            ${sorted.length === 0 ? '<p>Тредов пока нет. Создай первый!</p>' : sorted.map(t => `
+                            ${sorted.length === 0 ? `<p>${t.no_threads}</p>` : sorted.map(thread => `
                                 <div class="thread">
                                     <div class="thread-header">
-                                        <span class="thread-title">${escapeHtml(t.title || 'Без темы')}</span>
-                                        <span class="thread-replies">ответов: ${t.reply_count || 0}</span>
+                                        <span class="thread-title">${escapeHtml(thread.title || defaultTitle)}</span>
+                                        <span class="thread-replies">${t.replies}${thread.reply_count || 0}</span>
                                     </div>
                                     <div class="thread-op">
-                                        <span class="op-name"><strong>${escapeHtml(t.op_name || 'Аноним')}</strong></span>
-                                        <span class="op-date">${formatDate(t.created_at)}</span>
-                                        <div class="op-content">${truncateText(t.op_content, 200)}</div>
+                                        <span class="op-name"><strong>${escapeHtml(thread.op_name || defaultName)}</strong></span>
+                                        <span class="op-date">${formatDate(thread.created_at)}</span>
+                                        <div class="op-content">${truncateText(thread.op_content, 200)}</div>
                                     </div>
-                                    <a href="thread.html?id=${t.id}" class="reply-link">Ответить</a>
+                                    <a href="thread.html?id=${thread.id}" class="reply-link">${t.reply_link}</a>
                                 </div>
                             `).join('')}
                         </div>
@@ -77,7 +148,7 @@
                 })
                 .catch(err => {
                     console.error('Ошибка загрузки:', err);
-                    document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка загрузки тредов. Попробуйте позже.</p>';
+                    document.getElementById('content').innerHTML = `<p style="color: red;">${translations[currentLang].error_load}</p>`;
                 });
         }
         
@@ -85,15 +156,16 @@
             const title = document.getElementById('threadTitle').value;
             const content = document.getElementById('threadContent').value;
             const guest_name = document.getElementById('threadName').value;
+            const t = translations[currentLang];
             
             if (!content.trim()) {
-                alert('Введите текст поста');
+                alert(t.error_empty);
                 return;
             }
             
             const btn = document.querySelector('.new-thread-form button');
             btn.disabled = true;
-            btn.textContent = 'Создаю...';
+            btn.textContent = t.creating;
             
             fetch(`${API_BASE}/boards/${currentBoard}/thread`, {
                 method: 'POST',
@@ -111,21 +183,22 @@
                     document.getElementById('threadName').value = '';
                     loadThreads();
                 } else {
-                    alert('Ошибка: ' + (data.error || 'неизвестная'));
+                    alert(t.error_create + (data.error || 'unknown'));
                 }
             })
             .catch(err => {
                 console.error('Ошибка создания:', err);
-                alert('Не удалось создать тред: ' + err.message);
+                alert(t.error_create + err.message);
             })
             .finally(() => {
                 btn.disabled = false;
-                btn.textContent = 'Создать';
+                btn.textContent = t.create_button;
             });
         }
         
         function formatDate(dateStr) {
             const date = new Date(dateStr);
+            // Дата всегда в русском формате (день/месяц)
             return date.toLocaleString('ru-RU', {
                 day: '2-digit',
                 month: '2-digit',
@@ -153,6 +226,8 @@
             return div.innerHTML;
         }
         
+        // Инициализация
+        renderBoards();
         loadThreads();
     </script>
 </body>
