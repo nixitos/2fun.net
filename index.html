@@ -36,7 +36,7 @@
                     return r.json();
                 })
                 .then(threads => {
-                    // Сортируем: сначала новые (по bump_time или created_at)
+                    // Сортируем: сначала новые
                     const sorted = [...threads].sort((a, b) => {
                         const dateA = new Date(a.bump_time || a.created_at);
                         const dateB = new Date(b.bump_time || b.created_at);
@@ -61,7 +61,7 @@
                                     <div class="thread-op">
                                         <span class="op-name"><strong>${escapeHtml(t.op_name || 'Аноним')}</strong></span>
                                         <span class="op-date">${formatDate(t.created_at)}</span>
-                                        <div class="op-content">${escapeHtml((t.op_content || '')).substring(0, 200)}</div>
+                                        <div class="op-content">${escapeHtml((t.op_content || '')).substring(0, 200)}${(t.op_content || '').length > 200 ? '…' : ''}</div>
                                     </div>
                                     <a href="thread.html?id=${t.id}" class="reply-link">Ответить</a>
                                 </div>
@@ -72,7 +72,7 @@
                 })
                 .catch(err => {
                     console.error('Ошибка загрузки:', err);
-                    document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка загрузки тредов. Проверь консоль.</p>';
+                    document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка загрузки тредов. Попробуйте позже.</p>';
                 });
         }
         
