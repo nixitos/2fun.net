@@ -64,7 +64,10 @@
         
         function loadThread() {
             const t = translations[currentLang];
-            document.getElementById('loading-text').textContent = t.loading;
+            
+            // Проверяем существование элемента перед изменением
+            const loadingEl = document.getElementById('loading-text');
+            if (loadingEl) loadingEl.textContent = t.loading;
             
             fetch(`${API_BASE}/thread/${threadId}/posts`)
                 .then(r => r.json())
@@ -145,8 +148,8 @@
                 return;
             }
             
-            const originalText = btn.textContent;
             btn.disabled = true;
+            const originalText = btn.textContent;
             btn.textContent = t.sending;
             
             fetch(`${API_BASE}/thread/${threadId}/post`, {
@@ -162,13 +165,14 @@
                 return r.json();
             })
             .then(() => {
+                // Очищаем поле и перезагружаем
                 document.getElementById('replyContent').value = '';
                 loadThread();
             })
             .catch(err => {
                 console.error('Ошибка:', err);
                 alert(t.error_send + err.message);
-                // Восстанавливаем кнопку только если она ещё существует
+                // Восстанавливаем кнопку только если страница ещё не перезагрузилась
                 const currentBtn = document.querySelector('.reply-form button');
                 if (currentBtn) {
                     currentBtn.disabled = false;
