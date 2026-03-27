@@ -50,7 +50,7 @@ const cleanupOldThreads = async () => {
 };
 
 app.use(cors({
-    origin: ['https://nixitos.github.io', 'http://localhost:3000'],
+    origin: '*',
     methods: ['GET', 'POST', 'OPTIONS'],
     allowedHeaders: ['Content-Type']
 }));
