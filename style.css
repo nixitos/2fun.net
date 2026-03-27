@@ -22,6 +22,7 @@ body {
 .boards a.active {
     background: rgba(255,255,255,0.4);
     font-weight: bold;
+    border-radius: 20px;
 }
 
 .boards {
