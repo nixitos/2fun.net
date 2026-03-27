@@ -3,6 +3,12 @@ const router = express.Router();
 
 const cooldown = new Map();
 
+const LIMITS = {
+    title: 100,
+    name: 30,
+    content: 5000
+};
+
 function checkCooldown(ip, action, seconds) {
     const key = `${ip}:${action}`;
     const last = cooldown.get(key);
@@ -52,6 +58,15 @@ module.exports = (pool) => {
             
             if (!content || content.trim() === '') {
                 return res.status(400).json({error: 'Текст поста обязателен'});
+            }
+            if (title && title.length > LIMITS.title) {
+                return res.status(400).json({ error: `Тема не длиннее ${LIMITS.title} символов` });
+            }
+            if (guest_name && guest_name.length > LIMITS.name) {
+                return res.status(400).json({ error: `Имя не длиннее ${LIMITS.name} символов` });
+            }
+            if (content.length > LIMITS.content) {
+                return res.status(400).json({ error: `Текст поста не длиннее ${LIMITS.content} символов` });
             }
             
             const boardRes = await pool.query('SELECT id FROM boards WHERE name = $1', [req.params.board]);
@@ -108,7 +123,13 @@ module.exports = (pool) => {
             const { content, guest_name } = req.body;
             
             if (!content || content.trim() === '') {
-                return res.status(400).json({error: 'Текст поста обязателен'});
+                return res.status(400).json({error: 'Текст ответа обязателен'});
+            }
+            if (guest_name && guest_name.length > LIMITS.name) {
+                return res.status(400).json({ error: `Имя не длиннее ${LIMITS.name} символов` });
+            }
+            if (content.length > LIMITS.content) {
+                return res.status(400).json({ error: `Текст ответа не длиннее ${LIMITS.content} символов` });
             }
             
             await pool.query(
