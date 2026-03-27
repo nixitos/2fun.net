@@ -200,7 +200,7 @@ button:disabled {
     border: 1px dashed #ccc;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
     .header {
         padding: 15px 12px;
         margin: -8px -8px 20px -8px;
