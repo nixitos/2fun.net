@@ -140,6 +140,12 @@
             }
             
             const btn = document.querySelector('.reply-form button');
+            if (!btn) {
+                console.error('Кнопка не найдена');
+                return;
+            }
+            
+            const originalText = btn.textContent;
             btn.disabled = true;
             btn.textContent = t.sending;
             
@@ -162,8 +168,12 @@
             .catch(err => {
                 console.error('Ошибка:', err);
                 alert(t.error_send + err.message);
-                btn.disabled = false;
-                btn.textContent = t.reply_button;
+                // Восстанавливаем кнопку только если она ещё существует
+                const currentBtn = document.querySelector('.reply-form button');
+                if (currentBtn) {
+                    currentBtn.disabled = false;
+                    currentBtn.textContent = t.reply_button;
+                }
             });
         }
         
