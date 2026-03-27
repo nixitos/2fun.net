@@ -115,6 +115,11 @@ button:disabled {
     max-width: 900px;
     margin: 0 auto;
 }
+/* Обрезка текста епт */
+.truncation-dots {
+    opacity: 0.5;
+    font-weight: normal;
+}
 
 .op-post {
     background: #f0f7ff;
