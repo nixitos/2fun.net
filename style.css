@@ -19,6 +19,11 @@ body {
     text-decoration: none;
 }
 
+.boards a.active {
+    background: rgba(255,255,255,0.4);
+    font-weight: bold;
+}
+
 .boards {
     margin-top: 10px;
 }
