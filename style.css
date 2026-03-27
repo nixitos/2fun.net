@@ -363,31 +363,33 @@ button:disabled {
 }
 
 @media (max-width: 768px) {
-    body {
-        padding: 8px;
-        font-size: 18px;
+    .header {
+        padding: 15px 12px;
+        margin: -8px -8px 20px -8px;
+        border-radius: 0;
     }
     
-    .header {
-        padding: 12px;
-        text-align: center;
+    .header > div {
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .header img {
+        height: 55px;
     }
     
     .header h1 {
         font-size: 28px;
-        margin: 10px 0;
+        margin: 0;
     }
     
     .boards {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
         gap: 12px;
-        margin: 15px 0;
+        margin-top: 8px;
     }
     
     .boards a {
-        font-size: 20px;
+        font-size: 18px;
         padding: 8px 16px;
         background: rgba(255,255,255,0.2);
         border-radius: 30px;
@@ -396,26 +398,40 @@ button:disabled {
     .new-thread-form {
         padding: 20px;
         margin-bottom: 25px;
+        border-radius: 16px;
+    }
+    
+    .new-thread-form h3 {
+        font-size: 22px;
+        margin-top: 0;
+        margin-bottom: 15px;
     }
     
     .new-thread-form input,
     .new-thread-form textarea {
         font-size: 18px;
-        padding: 14px;
+        padding: 14px 12px;
         margin: 10px 0;
+        border-radius: 12px;
     }
     
-    button {
+    .new-thread-form button {
         font-size: 20px;
         padding: 14px;
-        width: 100%;
+        border-radius: 12px;
+        margin-top: 10px;
     }
     
-    /* Карточка треда */
     .thread {
         padding: 18px;
         margin: 15px 0;
         border-radius: 16px;
+        border-width: 2px;
+    }
+    
+    .thread-header {
+        margin-bottom: 12px;
+        gap: 8px;
     }
     
     .thread-title {
@@ -423,23 +439,31 @@ button:disabled {
     }
     
     .thread-replies {
-        font-size: 16px;
+        font-size: 15px;
         padding: 4px 12px;
+        border-radius: 20px;
+    }
+    
+    .thread-op {
+        margin-top: 8px;
     }
     
     .op-name {
+        font-size: 17px;
+    }
+    
+    .op-name strong {
         font-size: 18px;
     }
     
     .op-date {
-        font-size: 14px;
-        display: inline-block;
+        font-size: 13px;
         margin-left: 8px;
     }
     
     .op-content {
         font-size: 16px;
-        line-height: 1.5;
+        line-height: 1.45;
         margin-top: 12px;
     }
     
@@ -447,72 +471,8 @@ button:disabled {
         font-size: 18px;
         padding: 12px;
         margin-top: 15px;
+        border-radius: 12px;
         text-align: center;
         display: block;
-        background: #0066cc;
-        color: white;
-        border-radius: 12px;
-        text-decoration: none;
-    }
-    
-    /* Страница треда */
-    .op-post {
-        padding: 18px;
-        margin-bottom: 25px;
-        border-radius: 16px;
-    }
-    
-    .post-header {
-        font-size: 16px;
-        gap: 10px;
-        flex-wrap: wrap;
-    }
-    
-    .post-name {
-        font-size: 18px;
-    }
-    
-    .post-number, .post-date {
-        font-size: 14px;
-    }
-    
-    .post-content {
-        font-size: 16px;
-        line-height: 1.5;
-    }
-    
-    .reply-form {
-        padding: 18px;
-        margin: 20px 0;
-    }
-    
-    .reply-form input,
-    .reply-form textarea {
-        font-size: 18px;
-        padding: 14px;
-    }
-    
-    .reply {
-        padding: 16px;
-        margin: 12px 0;
-        border-radius: 14px;
-    }
-    
-    .reply .post-name {
-        font-size: 17px;
-    }
-    
-    .reply .post-content {
-        font-size: 15px;
-    }
-    
-    .replies h3 {
-        font-size: 22px;
-        margin: 20px 0 15px;
-    }
-    
-    .mascot {
-        max-width: 200px;
-        margin: 10px auto;
     }
 }
