@@ -217,6 +217,10 @@ button:disabled {
         padding: 12px;
         margin: -10px -10px 15px -10px;
     }
+
+    .header img[alt="Telegram"] {
+        height: 24px;
+    }
     
     .header > div {
         gap: 8px;
