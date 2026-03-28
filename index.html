@@ -46,6 +46,9 @@
                 error_empty: "Введите текст поста",
                 error_create: "Не удалось создать тред: ",
                 creating: "Создаю...",
+                search_placeholder: "Поиск тредов...",
+                search_button: "Найти",
+                back_to_boards: "Назад к доскам",
                 boards: {
                     b: "общий",
                     pol: "политика",
@@ -66,6 +69,9 @@
                 error_empty: "Enter post text",
                 error_create: "Failed to create thread: ",
                 creating: "Creating...",
+                search_placeholder: "Search threads...",
+                search_button: "Search",
+                back_to_boards: "Back to boards",
                 boards: {
                     b: "general",
                     pol: "politics",
@@ -78,6 +84,76 @@
         let currentLang = navigator.language.startsWith('ru') ? 'ru' : 'en';
         document.title = translations[currentLang].title;
         // =================================
+
+// Поиск тредов
+        
+        let searchMode = false;
+        let searchQuery = '';
+        
+        function searchThreads(event) {
+            event.preventDefault();
+            const query = document.getElementById('search-input').value.trim();
+            if (!query) return;
+            
+            searchMode = true;
+            searchQuery = query;
+            currentBoard = null; // отключаем доску
+            
+            fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`)
+                .then(r => r.json())
+                .then(threads => {
+                    displaySearchResults(threads, query);
+                })
+                .catch(err => {
+                    console.error('Ошибка поиска:', err);
+                    document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка поиска</p>';
+                });
+        }
+        
+        function displaySearchResults(threads, query) {
+            const t = translations[currentLang];
+            const html = `
+                <div class="search-header">
+                    <button onclick="clearSearch()" class="back-button">← ${t.back_to_boards || 'Назад к доскам'}</button>
+                    <h3>Результаты поиска: "${escapeHtml(query)}" (${threads.length})</h3>
+                </div>
+                <div class="threads">
+                    ${threads.length === 0 ? '<p>Ничего не найдено</p>' : threads.map(thread => `
+                        <div class="thread">
+                            <div class="thread-header">
+                                <span class="thread-title">${escapeHtml(thread.title || 'Без темы')}</span>
+                                <span class="thread-board">[${thread.board_name}]</span>
+                                <span class="thread-replies">${t.replies || 'ответов:'} ${thread.reply_count || 0}</span>
+                            </div>
+                            <div class="thread-op">
+                                <span class="op-name"><strong>${escapeHtml(thread.op_name || (currentLang === 'ru' ? 'Аноним' : 'Anonymous'))}</strong></span>
+                                <span class="op-date">${formatDate(thread.created_at)}</span>
+                                <div class="op-content">${highlightText(thread.op_content || '', query)}</div>
+                            </div>
+                            <a href="thread.html?id=${thread.id}" class="reply-link">${t.reply_link || 'Ответить'}</a>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            document.getElementById('content').innerHTML = html;
+        }
+        
+        function clearSearch() {
+            searchMode = false;
+            searchQuery = '';
+            currentBoard = new URLSearchParams(location.search).get('board') || 'b';
+            loadThreads();
+        }
+        
+        function highlightText(text, query) {
+            if (!text) return '';
+            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+            return escapeHtml(text).replace(regex, '<mark>$1</mark>');
+        }
+        
+        function escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
         
         // Рендерим кнопки досок
         function renderBoards() {
