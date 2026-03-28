@@ -212,6 +212,58 @@ button:disabled {
     border: 1px dashed #ccc;
 }
 
+/* Поиск */
+
+.search-container {
+    display: inline-block;
+    margin-left: 15px;
+}
+
+.search-input {
+    padding: 5px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.search-button {
+    padding: 5px 10px;
+    margin-left: 5px;
+    background: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.search-header {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.back-button {
+    background: #666;
+    padding: 5px 12px;
+    width: auto;
+}
+
+mark {
+    background: #ffeb3b;
+    padding: 0 2px;
+    border-radius: 2px;
+}
+
+.thread-board {
+    font-size: 12px;
+    color: #0066cc;
+    background: #e6f0ff;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 8px;
+}
+
 /* mobile */
 @media (max-width: 768px) {
     body {
@@ -224,6 +276,22 @@ button:disabled {
         margin: -10px -10px 15px -10px;
     }
 
+/*Поиск*/
+    .search-container {
+        display: block;
+        margin: 10px 0 0 0;
+        width: 100%;
+    }
+    
+    .search-input {
+        width: calc(100% - 70px);
+    }
+    
+    .search-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
     .header img[alt="Telegram"] {
         height: 24px;
     }
