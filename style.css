@@ -284,7 +284,7 @@ mark {
     }
     
     .search-input {
-        width: calc(100% - 70px);
+        width: calc(100% - 50px); /*-70 classic*/
     }
     
     .search-header {
