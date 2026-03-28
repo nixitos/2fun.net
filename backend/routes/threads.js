@@ -110,6 +110,43 @@ module.exports = (pool) => {
         }
     });
 
+    router.get('/search', async (req, res) => {
+        try {
+            const query = req.query.q;
+            if (!query || query.trim() === '') {
+                return res.status(400).json({ error: 'Введите поисковый запрос' });
+            }
+            
+            const searchTerm = `%${query.toLowerCase()}%`;
+            
+            const result = await pool.query(`
+                SELECT DISTINCT 
+                    t.id,
+                    t.title,
+                    t.board_id,
+                    b.name as board_name,
+                    t.created_at,
+                    t.bump_time,
+                    (SELECT count(*) - 1 FROM posts WHERE thread_id = t.id) as reply_count,
+                    (SELECT content FROM posts WHERE thread_id = t.id ORDER BY created_at LIMIT 1) as op_content,
+                    (SELECT guest_name FROM posts WHERE thread_id = t.id ORDER BY created_at LIMIT 1) as op_name
+                FROM threads t
+                JOIN boards b ON t.board_id = b.id
+                LEFT JOIN posts p ON t.id = p.thread_id
+                WHERE LOWER(t.title) LIKE $1 
+                   OR LOWER(p.content) LIKE $1
+                GROUP BY t.id, b.name
+                ORDER BY t.bump_time DESC
+                LIMIT 100
+            `, [searchTerm]);
+            
+            res.json(result.rows);
+        } catch(err) {
+            console.error('GET /search error:', err);
+            res.status(500).json({ error: err.message });
+        }
+    });
+    
     router.post('/thread/:id/post', async (req, res) => {
         try {
             const ip = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
