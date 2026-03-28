@@ -30,287 +30,298 @@
     <div class="boards" id="boards-container"></div>
 </div>
         
-    <div id="content"></div>
+<div id="content"></div>
     
-    <script>
-        const API_BASE = 'https://twofun-net.onrender.com/api';
-        let currentBoard = new URLSearchParams(location.search).get('board') || 'b';
-        
-        // Локализация
-        const translations = {
-            ru: {
-                title: "2fun - every hate u",
-                create_thread: "Создать тред",
-                thread_title_placeholder: "Тема (необязательно)",
-                thread_content_placeholder: "Текст поста",
-                thread_name_placeholder: "Имя (Аноним)",
-                create_button: "Создать",
-                no_threads: "Тредов пока нет. Создай первый!",
-                replies: "ответов: ",
-                reply_link: "Ответить",
-                error_load: "Ошибка загрузки тредов. Попробуйте позже.",
-                error_empty: "Введите текст поста",
-                error_create: "Не удалось создать тред: ",
-                creating: "Создаю...",
-                search_placeholder: "Поиск тредов...",
-                search_button: "Найти",
-                back_to_boards: "Назад к доскам",
-                boards: {
-                    b: "общий",
-                    pol: "политика",
-                    tech: "технологии"
-                }
-            },
-            en: {
-                title: "2fun - every hate u",
-                create_thread: "Create thread",
-                thread_title_placeholder: "Subject (optional)",
-                thread_content_placeholder: "Post text",
-                thread_name_placeholder: "Name (Anonymous)",
-                create_button: "Create",
-                no_threads: "No threads yet. Be the first!",
-                replies: "replies: ",
-                reply_link: "Reply",
-                error_load: "Failed to load threads. Try again later.",
-                error_empty: "Enter post text",
-                error_create: "Failed to create thread: ",
-                creating: "Creating...",
-                search_placeholder: "Search threads...",
-                search_button: "Search",
-                back_to_boards: "Back to boards",
-                boards: {
-                    b: "general",
-                    pol: "politics",
-                    tech: "technology"
-                }
+<script>
+    const API_BASE = 'https://twofun-net.onrender.com/api';
+    let currentBoard = new URLSearchParams(location.search).get('board') || 'b';
+    
+    // Локализация
+    const translations = {
+        ru: {
+            title: "2fun - every hate u",
+            create_thread: "Создать тред",
+            thread_title_placeholder: "Тема (необязательно)",
+            thread_content_placeholder: "Текст поста",
+            thread_name_placeholder: "Имя (Аноним)",
+            create_button: "Создать",
+            no_threads: "Тредов пока нет. Создай первый!",
+            replies: "ответов: ",
+            reply_link: "Ответить",
+            error_load: "Ошибка загрузки тредов. Попробуйте позже.",
+            error_empty: "Введите текст поста",
+            error_create: "Не удалось создать тред: ",
+            creating: "Создаю...",
+            search_placeholder: "Поиск тредов...",
+            search_button: "Найти",
+            back_to_boards: "Назад к доскам",
+            boards: {
+                b: "общий",
+                pol: "политика",
+                tech: "технологии"
             }
-        };
-        
-        // Определяем язык по браузеру
-        let currentLang = navigator.language.startsWith('ru') ? 'ru' : 'en';
-        document.title = translations[currentLang].title;
-        // =================================
-
-// Поиск тредов
-        
-        let searchMode = false;
-        let searchQuery = '';
-        
-        function searchThreads(event) {
-            event.preventDefault();
-            const query = document.getElementById('search-input').value.trim();
-            if (!query) return;
-            
-            searchMode = true;
-            searchQuery = query;
-            currentBoard = null; // отключаем доску
-            
-            fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`)
-                .then(r => r.json())
-                .then(threads => {
-                    displaySearchResults(threads, query);
-                })
-                .catch(err => {
-                    console.error('Ошибка поиска:', err);
-                    document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка поиска</p>';
-                });
-        }
-        
-        function displaySearchResults(threads, query) {
-            const t = translations[currentLang];
-            const html = `
-                <div class="search-header">
-                    <button onclick="clearSearch()" class="back-button">← ${t.back_to_boards || 'Назад к доскам'}</button>
-                    <h3>Результаты поиска: "${escapeHtml(query)}" (${threads.length})</h3>
-                </div>
-                <div class="threads">
-                    ${threads.length === 0 ? '<p>Ничего не найдено</p>' : threads.map(thread => `
-                        <div class="thread">
-                            <div class="thread-header">
-                                <span class="thread-title">${escapeHtml(thread.title || 'Без темы')}</span>
-                                <span class="thread-board">[${thread.board_name}]</span>
-                                <span class="thread-replies">${t.replies || 'ответов:'} ${thread.reply_count || 0}</span>
-                            </div>
-                            <div class="thread-op">
-                                <span class="op-name"><strong>${escapeHtml(thread.op_name || (currentLang === 'ru' ? 'Аноним' : 'Anonymous'))}</strong></span>
-                                <span class="op-date">${formatDate(thread.created_at)}</span>
-                                <div class="op-content">${highlightText(thread.op_content || '', query)}</div>
-                            </div>
-                            <a href="thread.html?id=${thread.id}" class="reply-link">${t.reply_link || 'Ответить'}</a>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-            document.getElementById('content').innerHTML = html;
-        }
-        
-        function clearSearch() {
-            searchMode = false;
-            searchQuery = '';
-            currentBoard = new URLSearchParams(location.search).get('board') || 'b';
-            loadThreads();
-        }
-        
-        function highlightText(text, query) {
-            if (!text) return '';
-            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
-            return escapeHtml(text).replace(regex, '<mark>$1</mark>');
-        }
-        
-        function escapeRegex(string) {
-            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }
-        
-        // Рендерим кнопки досок
-        function renderBoards() {
-            const boardsContainer = document.getElementById('boards-container');
-            const boards = translations[currentLang].boards;
-            let html = '';
-            for (const [id, name] of Object.entries(boards)) {
-                html += `<a href="?board=${id}" ${id === currentBoard ? 'class="active"' : ''}>${name}</a>`;
+        },
+        en: {
+            title: "2fun - every hate u",
+            create_thread: "Create thread",
+            thread_title_placeholder: "Subject (optional)",
+            thread_content_placeholder: "Post text",
+            thread_name_placeholder: "Name (Anonymous)",
+            create_button: "Create",
+            no_threads: "No threads yet. Be the first!",
+            replies: "replies: ",
+            reply_link: "Reply",
+            error_load: "Failed to load threads. Try again later.",
+            error_empty: "Enter post text",
+            error_create: "Failed to create thread: ",
+            creating: "Creating...",
+            search_placeholder: "Search threads...",
+            search_button: "Search",
+            back_to_boards: "Back to boards",
+            boards: {
+                b: "general",
+                pol: "politics",
+                tech: "technology"
             }
-            boardsContainer.innerHTML = html;
-            
-            // Добавляем обработчики, чтобы обновлять currentBoard без перезагрузки
-            document.querySelectorAll('.boards a').forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const url = new URL(link.href);
-                    currentBoard = url.searchParams.get('board');
-                    history.pushState(null, '', `?board=${currentBoard}`);
-                    renderBoards(); // обновляем активный класс
-                    loadThreads();
-                });
-            });
         }
-        
-        function loadThreads() {
-            fetch(`${API_BASE}/boards/${currentBoard}/thread`)
-                .then(r => {
-                    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                    return r.json();
-                })
-                .then(threads => {
-                    const sorted = [...threads].sort((a, b) => {
-                        const dateA = new Date(a.bump_time || a.created_at);
-                        const dateB = new Date(b.bump_time || b.created_at);
-                        return dateB - dateA;
-                    });
-                    
-                    const t = translations[currentLang];
-                    const defaultTitle = currentLang === 'ru' ? 'Без темы' : 'No title';
-                    const defaultName = currentLang === 'ru' ? 'Аноним' : 'Anonymous';
-                    
-                    const html = `
-                        <div class="new-thread-form">
-                            <h3>${t.create_thread}</h3>
-                            <input type="text" id="threadTitle" placeholder="${t.thread_title_placeholder}">
-                            <textarea id="threadContent" placeholder="${t.thread_content_placeholder}" rows="3"></textarea>
-                            <input type="text" id="threadName" placeholder="${t.thread_name_placeholder}">
-                            <button onclick="createThread()">${t.create_button}</button>
-                        </div>
-                        <div class="threads">
-                            ${sorted.length === 0 ? `<p>${t.no_threads}</p>` : sorted.map(thread => `
-                                <div class="thread">
-                                    <div class="thread-header">
-                                        <span class="thread-title">${escapeHtml(thread.title || defaultTitle)}</span>
-                                        <span class="thread-replies">${t.replies}${thread.reply_count || 0}</span>
-                                    </div>
-                                    <div class="thread-op">
-                                        <span class="op-name"><strong>${escapeHtml(thread.op_name || defaultName)}</strong></span>
-                                        <span class="op-date">${formatDate(thread.created_at)}</span>
-                                        <div class="op-content">${truncateText(thread.op_content, 200)}</div>
-                                    </div>
-                                    <a href="thread.html?id=${thread.id}" class="reply-link">${t.reply_link}</a>
-                                </div>
-                            `).join('')}
-                        </div>
-                    `;
-                    document.getElementById('content').innerHTML = html;
-                })
-                .catch(err => {
-                    console.error('Ошибка загрузки:', err);
-                    document.getElementById('content').innerHTML = `<p style="color: red;">${translations[currentLang].error_load}</p>`;
-                });
+    };
+    
+    // Определяем язык по браузеру
+    let currentLang = navigator.language.startsWith('ru') ? 'ru' : 'en';
+    document.title = translations[currentLang].title;
+    
+    // Обновление плейсхолдера и кнопки поиска
+    function updateSearchPlaceholder() {
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.querySelector('.search-button');
+        if (searchInput) {
+            searchInput.placeholder = translations[currentLang].search_placeholder;
         }
+        if (searchButton) {
+            searchButton.textContent = translations[currentLang].search_button;
+        }
+    }
+    
+    // Поиск тредов
+    let searchMode = false;
+    let searchQuery = '';
+    
+    function searchThreads(event) {
+        event.preventDefault();
+        const query = document.getElementById('search-input').value.trim();
+        if (!query) return;
         
-        function createThread() {
-            const title = document.getElementById('threadTitle').value;
-            const content = document.getElementById('threadContent').value;
-            const guest_name = document.getElementById('threadName').value;
-            const t = translations[currentLang];
-            
-            if (!content.trim()) {
-                alert(t.error_empty);
-                return;
-            }
-            
-            const btn = document.querySelector('.new-thread-form button');
-            btn.disabled = true;
-            btn.textContent = t.creating;
-            
-            fetch(`${API_BASE}/boards/${currentBoard}/thread`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({title, content, guest_name})
+        searchMode = true;
+        searchQuery = query;
+        currentBoard = null;
+        
+        fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`)
+            .then(r => r.json())
+            .then(threads => {
+                displaySearchResults(threads, query);
             })
+            .catch(err => {
+                console.error('Ошибка поиска:', err);
+                document.getElementById('content').innerHTML = '<p style="color: red;">Ошибка поиска</p>';
+            });
+    }
+    
+    function displaySearchResults(threads, query) {
+        const t = translations[currentLang];
+        const html = `
+            <div class="search-header">
+                <button onclick="clearSearch()" class="back-button">← ${t.back_to_boards}</button>
+                <h3>${currentLang === 'ru' ? 'Результаты поиска:' : 'Search results:'} "${escapeHtml(query)}" (${threads.length})</h3>
+            </div>
+            <div class="threads">
+                ${threads.length === 0 ? '<p>' + (currentLang === 'ru' ? 'Ничего не найдено' : 'Nothing found') + '</p>' : threads.map(thread => `
+                    <div class="thread">
+                        <div class="thread-header">
+                            <span class="thread-title">${highlightText(escapeHtml(thread.title || (currentLang === 'ru' ? 'Без темы' : 'No title')), query)}</span>
+                            <span class="thread-board">[${thread.board_name}]</span>
+                            <span class="thread-replies">${t.replies}${thread.reply_count || 0}</span>
+                        </div>
+                        <div class="thread-op">
+                            <span class="op-name"><strong>${escapeHtml(thread.op_name || (currentLang === 'ru' ? 'Аноним' : 'Anonymous'))}</strong></span>
+                            <span class="op-date">${formatDate(thread.created_at)}</span>
+                            <div class="op-content">${highlightText(thread.op_content || '', query)}</div>
+                        </div>
+                        <a href="thread.html?id=${thread.id}" class="reply-link">${t.reply_link}</a>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        document.getElementById('content').innerHTML = html;
+    }
+    
+    function clearSearch() {
+        searchMode = false;
+        searchQuery = '';
+        currentBoard = new URLSearchParams(location.search).get('board') || 'b';
+        loadThreads();
+    }
+    
+    function highlightText(text, query) {
+        if (!text || !query) return escapeHtml(text);
+        const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+        return escapeHtml(text).replace(regex, '<mark>$1</mark>');
+    }
+    
+    function escapeRegex(string) {
+        return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    
+    // Рендерим кнопки досок
+    function renderBoards() {
+        const boardsContainer = document.getElementById('boards-container');
+        const boards = translations[currentLang].boards;
+        let html = '';
+        for (const [id, name] of Object.entries(boards)) {
+            html += `<a href="?board=${id}" ${id === currentBoard ? 'class="active"' : ''}>${name}</a>`;
+        }
+        boardsContainer.innerHTML = html;
+        
+        document.querySelectorAll('.boards a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const url = new URL(link.href);
+                currentBoard = url.searchParams.get('board');
+                history.pushState(null, '', `?board=${currentBoard}`);
+                renderBoards();
+                loadThreads();
+            });
+        });
+    }
+    
+    function loadThreads() {
+        fetch(`${API_BASE}/boards/${currentBoard}/thread`)
             .then(r => {
                 if (!r.ok) throw new Error(`HTTP ${r.status}`);
                 return r.json();
             })
-            .then(data => {
-                if (data.thread_id) {
-                    document.getElementById('threadTitle').value = '';
-                    document.getElementById('threadContent').value = '';
-                    document.getElementById('threadName').value = '';
-                    loadThreads();
-                } else {
-                    alert(t.error_create + (data.error || 'unknown'));
-                }
+            .then(threads => {
+                const sorted = [...threads].sort((a, b) => {
+                    const dateA = new Date(a.bump_time || a.created_at);
+                    const dateB = new Date(b.bump_time || b.created_at);
+                    return dateB - dateA;
+                });
+                
+                const t = translations[currentLang];
+                const defaultTitle = currentLang === 'ru' ? 'Без темы' : 'No title';
+                const defaultName = currentLang === 'ru' ? 'Аноним' : 'Anonymous';
+                
+                const html = `
+                    <div class="new-thread-form">
+                        <h3>${t.create_thread}</h3>
+                        <input type="text" id="threadTitle" placeholder="${t.thread_title_placeholder}">
+                        <textarea id="threadContent" placeholder="${t.thread_content_placeholder}" rows="3"></textarea>
+                        <input type="text" id="threadName" placeholder="${t.thread_name_placeholder}">
+                        <button onclick="createThread()">${t.create_button}</button>
+                    </div>
+                    <div class="threads">
+                        ${sorted.length === 0 ? `<p>${t.no_threads}</p>` : sorted.map(thread => `
+                            <div class="thread">
+                                <div class="thread-header">
+                                    <span class="thread-title">${escapeHtml(thread.title || defaultTitle)}</span>
+                                    <span class="thread-replies">${t.replies}${thread.reply_count || 0}</span>
+                                </div>
+                                <div class="thread-op">
+                                    <span class="op-name"><strong>${escapeHtml(thread.op_name || defaultName)}</strong></span>
+                                    <span class="op-date">${formatDate(thread.created_at)}</span>
+                                    <div class="op-content">${truncateText(thread.op_content, 200)}</div>
+                                </div>
+                                <a href="thread.html?id=${thread.id}" class="reply-link">${t.reply_link}</a>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                document.getElementById('content').innerHTML = html;
+                updateSearchPlaceholder();
             })
             .catch(err => {
-                console.error('Ошибка создания:', err);
-                alert(t.error_create + err.message);
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.textContent = t.create_button;
+                console.error('Ошибка загрузки:', err);
+                document.getElementById('content').innerHTML = `<p style="color: red;">${translations[currentLang].error_load}</p>`;
+                updateSearchPlaceholder();
             });
+    }
+    
+    function createThread() {
+        const title = document.getElementById('threadTitle').value;
+        const content = document.getElementById('threadContent').value;
+        const guest_name = document.getElementById('threadName').value;
+        const t = translations[currentLang];
+        
+        if (!content.trim()) {
+            alert(t.error_empty);
+            return;
         }
         
-        function formatDate(dateStr) {
-            const date = new Date(dateStr);
-            // Дата всегда в русском формате (день/месяц)
-            return date.toLocaleString('ru-RU', {
-                day: '2-digit',
-                month: '2-digit',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
-        }
+        const btn = document.querySelector('.new-thread-form button');
+        btn.disabled = true;
+        btn.textContent = t.creating;
         
-        function truncateText(text, maxLength) {
-            if (!text) return '';
-            if (text.length <= maxLength) return escapeHtml(text);
-            
-            let truncated = text.substring(0, maxLength);
-            const lastSpace = truncated.lastIndexOf(' ');
-            if (lastSpace > 0) {
-                truncated = truncated.substring(0, lastSpace);
+        fetch(`${API_BASE}/boards/${currentBoard}/thread`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({title, content, guest_name})
+        })
+        .then(r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
+        .then(data => {
+            if (data.thread_id) {
+                document.getElementById('threadTitle').value = '';
+                document.getElementById('threadContent').value = '';
+                document.getElementById('threadName').value = '';
+                loadThreads();
+            } else {
+                alert(t.error_create + (data.error || 'unknown'));
             }
-            return escapeHtml(truncated) + '<span class="truncation-dots">…</span>';
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
+        })
+        .catch(err => {
+            console.error('Ошибка создания:', err);
+            alert(t.error_create + err.message);
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.textContent = t.create_button;
+        });
+    }
+    
+    function formatDate(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleString('ru-RU', {
+            day: '2-digit',
+            month: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    }
+    
+    function truncateText(text, maxLength) {
+        if (!text) return '';
+        if (text.length <= maxLength) return escapeHtml(text);
         
-        // Инициализация
-        renderBoards();
-        loadThreads();
-    </script>
+        let truncated = text.substring(0, maxLength);
+        const lastSpace = truncated.lastIndexOf(' ');
+        if (lastSpace > 0) {
+            truncated = truncated.substring(0, lastSpace);
+        }
+        return escapeHtml(truncated) + '<span class="truncation-dots">…</span>';
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+    
+    // Инициализация
+    renderBoards();
+    loadThreads();
+    updateSearchPlaceholder();
+</script>
 </body>
 </html>
