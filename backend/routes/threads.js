@@ -120,7 +120,7 @@ module.exports = (pool) => {
             const searchTerm = `%${query.toLowerCase()}%`;
             
             const result = await pool.query(`
-                SELECT DISTINCT 
+                SELECT 
                     t.id,
                     t.title,
                     t.board_id,
@@ -132,10 +132,8 @@ module.exports = (pool) => {
                     (SELECT guest_name FROM posts WHERE thread_id = t.id ORDER BY created_at LIMIT 1) as op_name
                 FROM threads t
                 JOIN boards b ON t.board_id = b.id
-                LEFT JOIN posts p ON t.id = p.thread_id
                 WHERE LOWER(t.title) LIKE $1 
-                   OR LOWER(p.content) LIKE $1
-                GROUP BY t.id, b.name
+                   OR LOWER((SELECT content FROM posts WHERE thread_id = t.id ORDER BY created_at LIMIT 1)) LIKE $1
                 ORDER BY t.bump_time DESC
                 LIMIT 100
             `, [searchTerm]);
