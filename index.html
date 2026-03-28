@@ -9,20 +9,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
 </head>
 <body>
-    <div class="header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="https://raw.githubusercontent.com/nixitos/2fun.net/refs/heads/main/mascot.png" 
-                 alt="2fun mascot" 
-                 style="height: 50px; width: auto;">
-            <h1 style="margin: 0;">2fun.net</h1>
-            <a href="https://t.me/twofunnet" target="_blank" rel="noopener noreferrer">
-                <img src="https://static.vecteezy.com/system/resources/previews/065/386/696/non_2x/telegram-icon-white-logo-telegram-app-transparent-background-premium-social-media-design-for-digital-download-free-png.png" 
-                     alt="Telegram" 
-                     style="height: 30px; width: auto; margin-left: 10px; vertical-align: middle;">
-            </a>
+<div class="header">
+    <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <img src="https://raw.githubusercontent.com/nixitos/2fun.net/refs/heads/main/mascot.png" 
+             alt="2fun mascot" 
+             style="height: 50px; width: auto;">
+        <h1 style="margin: 0;">2fun.net</h1>
+        <a href="https://t.me/twofunnet" target="_blank" rel="noopener noreferrer">
+            <img src="https://static.vecteezy.com/system/resources/previews/065/386/696/non_2x/telegram-icon-white-logo-telegram-app-transparent-background-premium-social-media-design-for-digital-download-free-png.png" 
+                 alt="Telegram" 
+                 style="height: 30px; width: auto; vertical-align: middle;">
+        </a>
+        <div class="search-container">
+            <form id="search-form" onsubmit="searchThreads(event)">
+                <input type="text" id="search-input" placeholder="🔍 Поиск..." class="search-input">
+                <button type="submit" class="search-button">Найти</button>
+            </form>
         </div>
-        <div class="boards" id="boards-container"></div>
     </div>
+    <div class="boards" id="boards-container"></div>
+</div>
         
     <div id="content"></div>
     
