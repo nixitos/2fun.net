@@ -53,6 +53,44 @@ All responses are JSON. CORS is enabled for all origins.
 
 ---
 
+## Search
+
+### Search threads
+
+`GET /search?q={query}`
+
+**Parameters:**
+| Name | Type | Description |
+|------|------|-------------|
+| `q` | string | Search query (required) |
+
+**Response:**
+```json
+[
+  {
+    "id": 42,
+    "title": "Thread title",
+    "board_name": "b",
+    "reply_count": 5,
+    "op_content": "First post content",
+    "op_name": "Anonymous",
+    "created_at": "2026-03-23T21:55:00.000Z",
+    "bump_time": "2026-03-23T21:55:00.000Z"
+  }
+]
+```
+Notes:
+
+- Search is case-insensitive
+- Searches in thread titles and first post content only (not replies)
+- Maximum 100 results, sorted by bump time (newest first)
+- Empty query returns 400 error
+
+Example:
+``GET https://twofun-net.onrender.com/api/search?q=chery``
+
+---
+
 ## Threads
 
 ### Get posts in a thread
@@ -98,7 +136,7 @@ All responses are JSON. CORS is enabled for all origins.
 
 | Status | Meaning |
 |--------|---------|
-| 400 | Missing content |
+| 400 | Missing content or empty search query |
 | 404 | Board or thread not found |
 | 429 | Too many requests, anti-DDoS/DoS |
 | 500 | Server error |
