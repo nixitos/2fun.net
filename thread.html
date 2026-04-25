@@ -18,7 +18,7 @@
     </div>
     
     <script>
-        const API_BASE = 'https://twofun-net.onrender.com/api';
+        const API_BASE = 'https://twofun-net-zqzn.onrender.com';
         const urlParams = new URLSearchParams(location.search);
         const threadId = urlParams.get('id');
         
@@ -56,7 +56,7 @@
             }
         };
         
-        // Определяем язык по браузеру
+        // язычок от браузера
         let currentLang = navigator.language.startsWith('ru') ? 'ru' : 'en';
         // =================================
         
@@ -65,7 +65,7 @@
         function loadThread() {
             const t = translations[currentLang];
             
-            // Проверяем существование элемента перед изменением
+            // есть ли элемент крч
             const loadingEl = document.getElementById('loading-text');
             if (loadingEl) loadingEl.textContent = t.loading;
             
@@ -165,14 +165,13 @@
                 return r.json();
             })
             .then(() => {
-                // Очищаем поле и перезагружаем
+                // очищаем поле и перезагружаемся
                 document.getElementById('replyContent').value = '';
                 loadThread();
             })
             .catch(err => {
                 console.error('Ошибка:', err);
                 alert(t.error_send + err.message);
-                // Восстанавливаем кнопку только если страница ещё не перезагрузилась
                 const currentBtn = document.querySelector('.reply-form button');
                 if (currentBtn) {
                     currentBtn.disabled = false;
@@ -199,7 +198,7 @@
             return div.innerHTML;
         }
         
-        // Инициализация
+        // инсталл
         loadThread();
     </script>
 </body>
