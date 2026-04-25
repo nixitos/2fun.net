@@ -18,7 +18,7 @@
     </div>
     
     <script>
-        const API_BASE = 'https://twofun-net-zqzn.onrender.com';
+        const API_BASE = 'https://twofun-net-zqzn.onrender.com/api';
         const urlParams = new URLSearchParams(location.search);
         const threadId = urlParams.get('id');
         
@@ -26,7 +26,7 @@
             window.location.href = '/2fun.net/';
         }
         
-        // Локализация
+        // локализация
         const translations = {
             ru: {
                 loading: "Загрузка...",
