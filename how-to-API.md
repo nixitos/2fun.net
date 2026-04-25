@@ -87,7 +87,7 @@ Notes:
 - Empty query returns 400 error
 
 Example:
-``GET https://twofun-net.onrender.com/api/search?q=chery``
+``GET https://twofun-net-zqzn.onrender.com/api/search?q=chery``
 
 ---
 
@@ -154,12 +154,12 @@ Error response:
 
 **Get all threads in /b/:**
 ```
-GET https://twofun-net.onrender.com/api/boards/b/thread
+GET https://twofun-net-zqzn.onrender.com/api/boards/b/thread
 ```
 
 **Create a thread:**
 ```
-POST https://twofun-net.onrender.com/api/boards/b/thread
+POST https://twofun-net-zqzn.onrender.com/api/boards/b/thread
 Content-Type: application/json
 
 {"content": "Hello", "guest_name": "User"}
@@ -167,7 +167,7 @@ Content-Type: application/json
 
 **Reply to thread #42:**
 ```
-POST https://twofun-net.onrender.com/api/thread/42/post
+POST https://twofun-net-zqzn.onrender.com/api/thread/42/post
 Content-Type: application/json
 
 {"content": "Reply text"}
