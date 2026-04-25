@@ -33,10 +33,10 @@
 <div id="content"></div>
     
 <script>
-    const API_BASE = 'https://twofun-net.onrender.com/api';
+    const API_BASE = 'https://twofun-net-zqzn.onrender.com';
     let currentBoard = new URLSearchParams(location.search).get('board') || 'b';
     
-    // Локализация
+    // язычки :P
     const translations = {
         ru: {
             title: "2fun - every hate u",
@@ -86,11 +86,11 @@
         }
     };
     
-    // Определяем язык по браузеру
+    // язык от браузера
     let currentLang = navigator.language.startsWith('ru') ? 'ru' : 'en';
     document.title = translations[currentLang].title;
     
-    // Обновление плейсхолдера и кнопки поиска
+    // плейсхолдер
     function updateSearchPlaceholder() {
         const searchInput = document.getElementById('search-input');
         const searchButton = document.querySelector('.search-button');
@@ -102,7 +102,7 @@
         }
     }
     
-    // Поиск тредов
+    // поиск
     let searchMode = false;
     let searchQuery = '';
     
@@ -171,7 +171,7 @@
         return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
     
-    // Рендерим кнопки досок
+    // рендер кнопок доски
     function renderBoards() {
         const boardsContainer = document.getElementById('boards-container');
         const boards = translations[currentLang].boards;
@@ -318,7 +318,7 @@
         return div.innerHTML;
     }
     
-    // Инициализация
+    // инсталл ебени
     renderBoards();
     loadThreads();
     updateSearchPlaceholder();
