@@ -1,6 +1,6 @@
 # 2fun.net API
 
-**Base URL:** `https://twofun-net.onrender.com/api`
+**Base URL:** `https://twofun-net-zqzn.onrender.com/api`
 
 All responses are JSON. CORS is enabled for all origins.
 
