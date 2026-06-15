@@ -1,7 +1,7 @@
 <div align="center">
 
 ## what is this 
-<img src="https://s10.iimage.su/s/23/gt8QoJyx4IdeNr1o8ShtcSwWyMS7izyByA8coCNM7.png">
+<img src="https://raw.githubusercontent.com/nixitos/2fun.net/refs/heads/main/2fun-new.png">
 
 A 4chan-like project by nixitos. Every here - is free.
 
